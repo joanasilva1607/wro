@@ -9,8 +9,10 @@ from ultis import printAngle, start_thread
 
 
 class Camera:
-	im = None
-	hsv = None
+	img = None
+	hsv_img = None
+	visuals_img = None
+
 	frame = 0
 
 	colors = {
@@ -38,10 +40,12 @@ class Camera:
 		Camera.picam2.start()
 
 		start_thread(Camera.capture)
-		sleep(0.3)
-		start_thread(Camera.hsv)
-		sleep(0.3)
 		start_thread(Camera.get_traffic_signs)
+
+	@staticmethod
+	def wait_load():
+		while Camera.img is None:
+			sleep(0.1)
 
 	@staticmethod
 	def capture():
@@ -54,20 +58,34 @@ class Camera:
 			im_cp = im_cp[crop["top"]:crop["height"], crop["left"]:crop["width"]]
 
 			# Scale image down to 1/2
-			Camera.im = cv2.resize(im_cp, (0, 0), fx=0.2, fy=0.2)
+			Camera.img = cv2.resize(im_cp, (0, 0), fx=0.25, fy=0.25)
 			Camera.frame += 1
 
 	@staticmethod
-	def hsv():
+	def visuals():
 		last_frame = 0
+
+		Camera.wait_load()
 
 		while True:
 			if Camera.frame != last_frame:
 				last_frame = Camera.frame
-			else:
-				continue
 
-			Camera.hsv = cv2.cvtColor(Camera.im, cv2.COLOR_BGR2HSV)
+			img = Camera.img.copy()
+
+			for color in Camera.colors:
+				if Camera.colors[color]["detected"]:
+					# Draw a point at the center of the detected traffic sign with it's color
+					cv2.circle(img, Camera.colors[color]["center"], 5, (0, 255, 0), -1)
+
+					# Draw a line from the center of the image to the detected traffic sign
+					cv2.line(img, (img.shape[1] // 2, img.shape[0]), Camera.colors[color]["center"], (0, 255, 0), 2)
+
+					
+					# Put distance and angle text on the image
+					cv2.putText(img, f"Distance: {int(Camera.colors[color]['distance'])}", (Camera.colors[color]["center"][0] - 50, Camera.colors[color]["center"][1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+
+			Camera.visuals_img = img
 
 	@staticmethod
 	def get_frame(frame):
@@ -83,21 +101,26 @@ class Camera:
 	def get_traffic_signs():
 		last_frame = 0
 
+		Camera.wait_load()
+
 		while True:
 			if Camera.frame != last_frame:
 				last_frame = Camera.frame
 			else:
+				sleep(1/180)
 				continue
+
+			Camera.hsv_img = cv2.cvtColor(Camera.img, cv2.COLOR_BGR2HSV)
 
 			for color in Camera.colors:
 				Camera.colors[color]["detected"], Camera.colors[color]["mask"], Camera.colors[color]["distance"], Camera.colors[color]["angle"], Camera.colors[color]["center"]  = Camera.process_traffic_sign(Config.config["camera"]["colors"][color])
 
-			closest_color = Camera.colors["green"] if Camera.colors["green"]["distance"] < Camera.colors["red"]["distance"] else Camera.colors["red"]
+			#closest_color = Camera.colors["green"] if Camera.colors["green"]["distance"] < Camera.colors["red"]["distance"] else Camera.colors["red"]
 
 	@staticmethod
 	def process_traffic_sign(config):
-		hsv =  Camera.hsv
-		im = Camera.im
+		hsv =  Camera.hsv_img
+		im = Camera.img
 
 		h_min = config["lower"][0]
 		h_max = config["upper"][0]

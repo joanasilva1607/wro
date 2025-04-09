@@ -13,23 +13,29 @@ log = logging.getLogger('werkzeug')
 log.disabled = True
 
 
-def feed(color=None):
+def feed(color=None, visuals=None):
 	while True:
 		sleep(1/20)
 
+		frame = Camera.get_frame( Camera.colors[color]["mask"] if color is not None else Camera.visuals_img if visuals is not None else Camera.img)
 		yield (b'--frame\r\n'
-			b'Content-Type: image/jpeg\r\n\r\n' +
-			  ( Camera.get_frame(Camera.colors[color]["mask"]) if color is not None  else Camera.get_frame(Camera.im)) +
-			b'\r\n')
+			b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
 @app.route('/video_feed')
 def video_feed():
 	color = request.args.get('color')
-	if color is None:
-		return Response(feed(), mimetype='multipart/x-mixed-replace; boundary=frame')
-	else:
+	visuals = request.args.get('visuals')
+
+
+	
+	if color:
 		return Response(feed(color=color), mimetype='multipart/x-mixed-replace; boundary=frame')
+	
+	if visuals:
+		return Response(feed(visuals=True), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+	return Response(feed(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/hsv')
 def get_hsv():

@@ -12,6 +12,7 @@ Config.init()
 Camera.init()
 
 if DEBUG:
+	start_thread(Camera.visuals)
 	start_thread(start_flask)
 
 # get cpu temperature
