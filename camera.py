@@ -79,6 +79,9 @@ class Camera:
 		while True:
 			if Camera.frame != last_frame:
 				last_frame = Camera.frame
+			else:
+				sleep(1/60)
+				continue
 
 			img = Camera.img.copy()
 
@@ -112,7 +115,7 @@ class Camera:
 			if Camera.frame != last_frame:
 				last_frame = Camera.frame
 			else:
-				sleep(1/180)
+				sleep(1/240)
 				continue
 
 			Camera.hsv_img = cv2.cvtColor(Camera.img, cv2.COLOR_BGR2HSV)
