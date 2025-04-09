@@ -98,7 +98,34 @@ class MyController(Controller):
                 SERVO.set_angle(angle)
 
         print("Angle: ", self.GetAngle())
-        
+
+    def on_up_arrow_press(self):
+        self.up = True
+
+        self.angle_offset = CMPS12.bearing3599() + 270
+
+        max_offset = 40
+        diff = SERVO.center - SERVO.min
+
+        Motor.forward(0.5)
+
+        while self.up:
+            current_bearing = self.GetAngle()
+
+            offset = current_bearing - 180
+
+            # Clamp the offset
+            if abs(offset) > max_offset:
+                offset = max_offset if offset > 0 else -max_offset
+
+            angle_adjustment = (offset / max_offset) * diff
+            angle = int(SERVO.center - angle_adjustment)
+            SERVO.set_angle(angle)
+    
+    def on_up_down_arrow_release(self):
+        Motor.stop()
+        self.up = False  
+    
     def on_R3_left(self, value):
         return
     
