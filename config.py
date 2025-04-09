@@ -39,7 +39,12 @@ class Config:
 					]
 				}
 			}
-		}
+		},
+		"robot": {
+			"speed": 0.65,
+			"center_steering": 91,
+			"max_steering_offset": 12,
+		},
 	}
 
 	@staticmethod

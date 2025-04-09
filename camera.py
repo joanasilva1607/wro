@@ -35,7 +35,7 @@ class Camera:
 	@staticmethod
 	def init():
 		Camera.picam2 = Picamera2()
-		Camera.picam2.configure(Camera.picam2.create_preview_configuration(main={"format": 'XRGB8888', "size": (1537, 864)}))
+		Camera.picam2.configure(Camera.picam2.create_preview_configuration(main={"format": 'RGB888', "size": (1537, 864)}, controls={'FrameRate': 60}))
 
 		Camera.picam2.start()
 
@@ -76,14 +76,10 @@ class Camera:
 			for color in Camera.colors:
 				if Camera.colors[color]["detected"]:
 					# Draw a point at the center of the detected traffic sign with it's color
-					cv2.circle(img, Camera.colors[color]["center"], 5, (0, 255, 0), -1)
+					cv2.circle(img, Camera.colors[color]["center"], 5, (255, 0, 0), -1)
 
 					# Draw a line from the center of the image to the detected traffic sign
-					cv2.line(img, (img.shape[1] // 2, img.shape[0]), Camera.colors[color]["center"], (0, 255, 0), 2)
-
-					
-					# Put distance and angle text on the image
-					cv2.putText(img, f"Distance: {int(Camera.colors[color]['distance'])}", (Camera.colors[color]["center"][0] - 50, Camera.colors[color]["center"][1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+					cv2.line(img, (img.shape[1] // 2, img.shape[0]), Camera.colors[color]["center"], (255, 0, 0), 2)
 
 			Camera.visuals_img = img
 

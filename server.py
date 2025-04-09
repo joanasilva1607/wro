@@ -27,8 +27,6 @@ def video_feed():
 	color = request.args.get('color')
 	visuals = request.args.get('visuals')
 
-
-	
 	if color:
 		return Response(feed(color=color), mimetype='multipart/x-mixed-replace; boundary=frame')
 	
