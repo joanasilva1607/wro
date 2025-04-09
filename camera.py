@@ -5,8 +5,11 @@ import cv2
 from picamera2 import Picamera2
 
 from config import Config
-from ultis import printAngle, start_thread
+from ultis import printAngle
 
+import os
+
+os.environ['LIBCAMERA_LOG_LEVELS'] = '4'
 
 class Camera:
 	img = None
@@ -35,12 +38,16 @@ class Camera:
 	@staticmethod
 	def init():
 		Camera.picam2 = Picamera2()
-		Camera.picam2.configure(Camera.picam2.create_preview_configuration(main={"format": 'RGB888', "size": (1537, 864)}, controls={'FrameRate': 60}))
-
-		Camera.picam2.start()
-
-		start_thread(Camera.capture)
-		start_thread(Camera.get_traffic_signs)
+		
+		Camera.picam2.configure(Camera.picam2.create_preview_configuration(main={
+				"format": 'RGB888', 
+				"size": (1537, 864)
+			}, 
+			controls={
+				'FrameRate': 60, 
+				"AwbEnable": False, 
+				"Brightness": Config.config["camera"]["brightness"],
+		}))
 
 	@staticmethod
 	def wait_load():
@@ -49,6 +56,8 @@ class Camera:
 
 	@staticmethod
 	def capture():
+		Camera.picam2.start()
+
 		while True:
 			crop = Config.config["camera"]["crop"]
 
