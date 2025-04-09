@@ -2,7 +2,7 @@ from pyPS4Controller.controller import Controller
 from cmps12 import CMPS12
 
 from motor import Motor
-from robot.robot import Robot
+from robot import Robot
 from servo import SERVO
 
 speed = 0.7
