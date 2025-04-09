@@ -1,11 +1,12 @@
-from cmps12.cmps12 import CMPS12
+from cmps12 import CMPS12
 
-from robot.motor.motor import Motor
-from servo.servo import SERVO
+from motor import Motor
+from servo import SERVO
 
 
 class Robot:
 	@staticmethod
 	def init():
-		Robot.servo = SERVO()
-		Robot.motor = Motor()
+		SERVO.init()
+		Motor.init()
+		CMPS12.init()

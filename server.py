@@ -1,5 +1,6 @@
 import json
 import logging
+import sys
 from time import sleep
 from flask import Flask, Response, request
 from flask_cors import CORS
@@ -9,9 +10,11 @@ from config import Config
 
 app = Flask(__name__)
 CORS(app)
+
 log = logging.getLogger('werkzeug')
 log.disabled = True
-
+cli = sys.modules['flask.cli']
+cli.show_server_banner = lambda *x: None
 
 def feed(color=None, visuals=None):
 	while True:
