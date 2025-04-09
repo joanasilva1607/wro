@@ -2,6 +2,7 @@ from pyPS4Controller.controller import Controller
 from cmps12 import CMPS12
 
 from motor import Motor
+from robot.robot import Robot
 from servo import SERVO
 
 speed = 0.7
@@ -48,7 +49,6 @@ class MyController(Controller):
     def on_left_right_arrow_release(self):
         SERVO.set_angle(SERVO.center)
 
-
     def on_R2_press(self, value):
         # Convert value from -30000 to 30000 to 0 to 1
         value = (value + 30000) / 60000
@@ -59,45 +59,14 @@ class MyController(Controller):
         if value > 1:
             value = 1
 
-        m1.on()
-        m2.off()
-        m_pwm.value = value
+        Motor.forward(value)
+
+    def on_R2_release(self):
+        Motor.stop()
 
     def on_triangle_press(self):
-        self.angle_offset = CMPS12.bearing3599() + 270
-                       
-        max_offset = 40
-        diff = SERVO.center - SERVO.min
-        margin = 0.5
+        Robot.RotateAngle(90, reverse=True)
 
-        Motor.forward(0.5)
-
-        while True:
-            current_bearing = self.GetAngle()
-
-            if current_bearing > (180 - margin) and current_bearing < (180 + margin):
-                Motor.stop()
-                SERVO.set_angle(SERVO.center)
-                break
-
-            if current_bearing < 180:
-                offset = 180 - current_bearing
-
-                if offset > max_offset:
-                    offset = max_offset
-
-                angle = int(SERVO.center + (offset / max_offset) * diff)
-                
-                SERVO.set_angle(angle)
-                
-            if current_bearing > 180:
-                offset = current_bearing - 180
-
-
-                angle = int(SERVO.center - (offset / max_offset) * diff)
-                SERVO.set_angle(angle)
-
-        print("Angle: ", self.GetAngle())
 
     def on_up_arrow_press(self):
         self.up = True
