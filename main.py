@@ -3,6 +3,7 @@ from camera import Camera
 from config import Config
 from lane import Lane
 from robot import Robot
+from mycontroller import init_my_controller
 from server import start_flask
 from ultis import start_thread
 
@@ -32,6 +33,7 @@ class WRO:
 		if DEBUG:
 			start_thread(Camera.visuals)
 			start_thread(start_flask)
+			start_thread(init_my_controller)
 
 		print("Threads initialized")
 
