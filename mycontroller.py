@@ -1,13 +1,17 @@
+import time
 from pyPS4Controller.controller import Controller
 from cmps12 import CMPS12
 
 from motor import Motor
 from robot import Robot
 from servo import SERVO
+from ultis import start_thread
 
 speed = 0.7
 
 class MyController(Controller):
+    up = None
+
     def GetAngle(self):
         bear = CMPS12.bearing3599()
 
@@ -17,9 +21,6 @@ class MyController(Controller):
             bear -= 360.0
         elif bear <= 0:
             bear += 360.0
-
-        print("Bear: ", bear)
-        print("Offset: ", self.angle_offset)
 
         return bear
 
@@ -70,15 +71,17 @@ class MyController(Controller):
 
     def on_up_arrow_press(self):
         self.up = True
+        start_thread(self.straight_move)
 
-        self.angle_offset = CMPS12.bearing3599() + 270
+    def straight_move(self):
+        self.angle_offset = CMPS12.bearing3599() + 180
 
         max_offset = 40
         diff = SERVO.center - SERVO.min
 
         Motor.forward(0.5)
 
-        while self.up:
+        while self.up is not None:
             current_bearing = self.GetAngle()
 
             offset = current_bearing - 180
@@ -90,10 +93,15 @@ class MyController(Controller):
             angle_adjustment = (offset / max_offset) * diff
             angle = int(SERVO.center - angle_adjustment)
             SERVO.set_angle(angle)
+
+            time.sleep(1/60)
     
+
+
     def on_up_down_arrow_release(self):
         Motor.stop()
-        self.up = False  
+        self.up = None
+        SERVO.set_angle(SERVO.center)
     
     def on_R3_left(self, value):
         return
