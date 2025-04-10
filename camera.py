@@ -118,7 +118,7 @@ class Camera:
 				sleep(1/240)
 				continue
 
-			Camera.hsv_img = cv2.cvtColor(Camera.img, cv2.COLOR_BGR2HSV)
+			Camera.hsv_img = cv2.cvtColor(Camera.img.copy(), cv2.COLOR_BGR2HSV)
 
 			for color in Camera.colors:
 				Camera.colors[color]["detected"], Camera.colors[color]["mask"], Camera.colors[color]["distance"], Camera.colors[color]["angle"], Camera.colors[color]["center"]  = Camera.process_traffic_sign(Config.config["camera"]["colors"][color])
@@ -127,7 +127,7 @@ class Camera:
 
 	@staticmethod
 	def process_traffic_sign(config):
-		hsv =  Camera.hsv_img
+		hsv =  Camera.hsv_img.copy()
 		im = Camera.img
 
 		h_min = config["lower"][0]
