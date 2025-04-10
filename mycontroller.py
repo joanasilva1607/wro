@@ -29,18 +29,6 @@ class MyController(Controller):
 
         self.angle_offset = CMPS12.bearing3599() + 180
 
-    def on_x_press(self):
-       Motor.forward(speed)
-
-    def on_x_release(self):
-        Motor.stop()
-
-    def on_circle_press(self):
-        Motor.backward(speed)
-
-    def on_circle_release(self):
-        Motor.stop()
-
     def on_left_arrow_press(self):
         SERVO.set_angle(SERVO.min)
 
@@ -65,9 +53,30 @@ class MyController(Controller):
     def on_R2_release(self):
         Motor.stop()
 
+    def on_square_press(self):
+        Robot.RotateAngle(-90)
+
+    def on_x_press(self):
+        Robot.RotateAngle(-90, reverse=True)
+
+    def on_circle_press(self):
+        Robot.RotateAngle(90)
+
     def on_triangle_press(self):
         Robot.RotateAngle(90, reverse=True)
 
+    def on_square_release(self):
+        return
+    
+    def on_x_release(self):
+        return
+
+    def on_circle_release(self):
+        return
+    
+    def on_triangle_release(self):
+        return
+    
 
     def on_up_arrow_press(self):
         self.up = True
