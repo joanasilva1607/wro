@@ -30,7 +30,9 @@ class Robot:
 		Robot.angle_offset = CMPS12.bearing3599() + 180 + angle
 
 		max_offset = 50
-		margin = 2
+		margin = 2.5
+
+		is_first_loop = True
 
 		while True:
 			current_bearing = Robot.GetAngle()
@@ -56,8 +58,13 @@ class Robot:
 			angle = int(SERVO.center - angle_adjustment)
 			SERVO.set_angle(angle)
 
-			speed_min = 0.3
-			speed_max = 0.5
+			#Wait for the servo to reach the target angle
+			if is_first_loop:
+				sleep(0.2)
+				is_first_loop = False
+
+			speed_min = 0.4
+			speed_max = 0.6
 
 			speed_range = speed_max - speed_min
 			speed = speed_min + (abs(ratio) * speed_range)
