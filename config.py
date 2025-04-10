@@ -7,6 +7,7 @@ from ultis import start_thread
 class Config:
 	config = {
 		"camera": {
+			"brightness": 0.3,
 			"crop": {
 				"left": 0,
 				"top": 280,
