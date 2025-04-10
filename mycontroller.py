@@ -82,13 +82,20 @@ class MyController(Controller):
         self.up = True
         start_thread(self.straight_move)
 
-    def straight_move(self):
+    def on_down_arrow_press(self):
+        self.up = True
+        start_thread(self.straight_move, args=[True] )
+
+    def straight_move(self, reverse=False):
         self.angle_offset = CMPS12.bearing3599() + 180
 
         max_offset = 40
         diff = SERVO.center - SERVO.min
 
-        Motor.forward(0.5)
+        if reverse:
+            Motor.backward(0.5)
+        else:
+            Motor.forward(0.5)
 
         while self.up is not None:
             current_bearing = self.GetAngle()
@@ -100,13 +107,15 @@ class MyController(Controller):
                 offset = max_offset if offset > 0 else -max_offset
 
             angle_adjustment = (offset / max_offset) * diff
+
+            if reverse:
+                angle_adjustment = -angle_adjustment
+
             angle = int(SERVO.center - angle_adjustment)
             SERVO.set_angle(angle)
 
             time.sleep(1/60)
     
-
-
     def on_up_down_arrow_release(self):
         Motor.stop()
         self.up = None
