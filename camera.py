@@ -71,7 +71,7 @@ class Camera:
 			im_cp = im_cp[crop["top"]:crop["height"], crop["left"]:crop["width"]]
 
 			# Scale image down to 1/2
-			Camera.img = cv2.resize(im_cp, (0, 0), fx=0.2, fy=0.2)
+			Camera.img = cv2.resize(im_cp, (0, 0), fx=0.3, fy=0.3)
 			Camera.frame += 1
 
 	@staticmethod
@@ -92,21 +92,25 @@ class Camera:
 					# Draw a line from the center of the image to the detected traffic sign
 					cv2.line(img, (img.shape[1] // 2, img.shape[0]), Camera.colors[color]["center"], (255, 0, 0), 2)
 
-			lines, _ = Camera.get_straight_lines_from_mask(Camera.colors["white"]["mask"])
+			lines = Camera.get_straight_lines_from_mask(Camera.colors["red"]["mask"])
+
 			# Find vertical lines within angle
 			vertical_lines = []
-			angle_margin = 360
+			angle_margin = 50
 
 			for line in lines:
 				x1, y1, x2, y2 = line
 				line_angle, _, _ = printAngle((x1, y1), (x2, y2), (x1, img.shape[0]))
 
-				if abs(line_angle) < angle_margin or True:
+				if abs(line_angle) < angle_margin:
 					vertical_lines.append(line)
 					cv2.line(img, (x1, y1), (x2, y2), (255, 255, 0), 2)
-					cv2.circle(img, (x1, y1), 5, (255, 255, 0), -1)
-					cv2.circle(img, (x2, y2), 5, (255, 255, 0), -1)
-					cv2.putText(img, f"{line_angle:.2f}", (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 1)
+					
+					#cv2.putText(img, f"{line_angle:.2f}", (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 1)
+					#This is an infinite line, draw text on middle of line
+					mid_x = (x1 + x2) // 2
+					mid_y = (y1 + y2) // 2
+					cv2.putText(img, f"{line_angle:.2f}", (mid_x, mid_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 1)
 
 
 			Camera.visuals_img = img
@@ -257,28 +261,27 @@ class Camera:
 		return cv2.add(output, color_mask)
 
 	@staticmethod
-	def get_straight_lines_from_mask(mask, draw_on=None):
+	def get_straight_lines_from_mask(mask):
 		edges = cv2.Canny(mask, 50, 150, apertureSize=3)
 
-		# Hough Line Transform
-		lines = cv2.HoughLinesP(edges, 
-								rho=1, 
-								theta=np.pi / 180, 
-								threshold=50, 
-								minLineLength=30, 
-								maxLineGap=20)
+		# Hough Line Transform (returns rho, theta)
+		lines = cv2.HoughLines(edges, 1, np.pi / 180, threshold=40)
 
 		line_segments = []
 		if lines is not None:
 			for line in lines:
-				x1, y1, x2, y2 = line[0]
+				rho, theta = line[0]
+				a = np.cos(theta)
+				b = np.sin(theta)
+				x0 = a * rho
+				y0 = b * rho
+
+				# Calculate two points far enough to draw the line
+				x1 = int(x0 + 1000 * (-b))
+				y1 = int(y0 + 1000 * a)
+				x2 = int(x0 - 1000 * (-b))
+				y2 = int(y0 - 1000 * a)
+
 				line_segments.append((x1, y1, x2, y2))
 
-		if draw_on is None:
-			return line_segments, None
-		
-
-		for line in line_segments:
-			cv2.line(draw_on, (x1, y1), (x2, y2), (255, 0, 0), 2)
-
-		return line_segments, draw_on
+		return line_segments
