@@ -1,3 +1,4 @@
+from time import sleep
 from cmps12 import CMPS12
 
 from motor import Motor
@@ -28,13 +29,8 @@ class Robot:
 	def RotateAngle(angle, reverse=False):
 		Robot.angle_offset = CMPS12.bearing3599() + 180 + angle
 
-		max_offset = 40
-		margin = 0.5
-
-		if reverse:
-			Motor.backward(0.5)
-		else:
-			Motor.forward(0.5)
+		max_offset = 50
+		margin = 1
 
 		while True:
 			current_bearing = Robot.GetAngle()
@@ -50,10 +46,25 @@ class Robot:
 			if abs(offset) > max_offset:
 				offset = max_offset if offset > 0 else -max_offset
 
-			angle_adjustment = (offset / max_offset) * (SERVO.center - SERVO.min)
+			ratio = (offset / max_offset)
+
+			angle_adjustment = ratio * (SERVO.center - SERVO.min)
 
 			if reverse:
 				angle_adjustment = -angle_adjustment
 
 			angle = int(SERVO.center - angle_adjustment)
 			SERVO.set_angle(angle)
+
+			speed_min = 0.2
+			speed_max = 0.6
+
+			speed_range = speed_max - speed_min
+			speed = speed_min + (abs(ratio) * speed_range)
+
+			if reverse:
+				Motor.backward(speed)
+			else:
+				Motor.forward(speed)
+
+			sleep(1/1000)
