@@ -1,5 +1,6 @@
 import time
 from pyPS4Controller.controller import Controller
+from camera import Camera
 from cmps12 import CMPS12
 
 from motor import Motor
@@ -115,6 +116,30 @@ class MyController(Controller):
             SERVO.set_angle(angle)
 
             time.sleep(1/60)
+
+    def on_L1_press(self):
+        while True:
+            Motor.forward(0.4)
+            left_angle = Camera.left_wall[4] if Camera.left_wall is not None else 0
+            right_angle = Camera.right_wall[4] if Camera.right_wall is not None else 0
+
+            angle = 0
+
+            if Camera.left_wall is not None and Camera.right_wall is not None:
+                angle = -(left_angle + right_angle)
+            else:
+                if Camera.left_wall is not None:
+                    angle = -((left_angle + 12))   
+                elif Camera.right_wall is not None:
+                    angle = -((right_angle - 12))
+                else:
+                    Motor.stop()
+                    break
+
+            SERVO.set_angle(SERVO.center + int(angle * 3))
+            print(angle*3)
+
+            time.sleep(1/120)
     
     def on_up_down_arrow_release(self):
         Motor.stop()
