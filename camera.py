@@ -39,6 +39,10 @@ class Camera:
 		}
 	}
 
+	left_wall = None
+	right_wall = None
+	top_wall = None
+
 	@staticmethod
 	def init():
 		Camera.picam2 = Picamera2()
@@ -84,6 +88,19 @@ class Camera:
 				[(255, 255, 255), (0, 255, 0), (0, 0, 255)]
 			)
 
+			if Camera.left_wall is not None:
+				# Draw left wall
+				cv2.line(img, (Camera.left_wall[0], Camera.left_wall[1]), (Camera.left_wall[2], Camera.left_wall[3]), (255, 255, 0), 2)
+
+			if Camera.right_wall is not None:
+				# Draw right wall
+				cv2.line(img, (Camera.right_wall[0], Camera.right_wall[1]), (Camera.right_wall[2], Camera.right_wall[3]), (0, 255, 255), 2)
+
+			if Camera.top_wall is not None:
+				# Draw top wall
+				cv2.line(img, (Camera.top_wall[0], Camera.top_wall[1]), (Camera.top_wall[2], Camera.top_wall[3]), (255, 0, 255), 2)
+
+
 			for color in ["green", "red"]:
 				if Camera.colors[color]["detected"]:
 					# Draw a point at the center of the detected traffic sign with it's color
@@ -92,26 +109,9 @@ class Camera:
 					# Draw a line from the center of the image to the detected traffic sign
 					cv2.line(img, (img.shape[1] // 2, img.shape[0]), Camera.colors[color]["center"], (255, 0, 0), 2)
 
-			lines = Camera.get_straight_lines_from_mask(Camera.colors["red"]["mask"])
 
-			# Find vertical lines within angle
-			vertical_lines = []
-			angle_margin = 50
-
-			for line in lines:
-				x1, y1, x2, y2 = line
-				line_angle, _, _ = printAngle((x1, y1), (x2, y2), (x1, img.shape[0]))
-
-				if abs(line_angle) < angle_margin:
-					vertical_lines.append(line)
-					cv2.line(img, (x1, y1), (x2, y2), (255, 255, 0), 2)
-					
-					#cv2.putText(img, f"{line_angle:.2f}", (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 1)
-					#This is an infinite line, draw text on middle of line
-					mid_x = (x1 + x2) // 2
-					mid_y = (y1 + y2) // 2
-					cv2.putText(img, f"{line_angle:.2f}", (mid_x, mid_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 1)
-
+			# Draw frame number
+			cv2.putText(img, f"Frame: {Camera.frame}", (5, 10), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0), 1)
 
 			Camera.visuals_img = img
 
@@ -149,6 +149,35 @@ class Camera:
 
 				if color in ["green", "red"]:
 					Camera.colors[color]["detected"], Camera.colors[color]["distance"], Camera.colors[color]["angle"], Camera.colors[color]["center"]  = Camera.process_traffic_sign(Camera.colors[color]["mask"])
+
+
+			lines = Camera.get_straight_lines_from_mask(Camera.colors["white"]["mask"])
+
+			left_wall = None
+			right_wall = None
+			top_wall = None
+
+			for line in lines:
+				x1, y1, x2, y2, line_angle = line
+
+				side_wall_angle = 12
+				side_wall_margin = 6
+
+				top_wall_angle = 180
+				top_wall_margin = 2
+
+				if abs(line_angle) > side_wall_angle - side_wall_margin and abs(line_angle) < side_wall_angle + side_wall_margin:
+					if line_angle < 0:
+						left_wall = line
+					else:	
+						right_wall = line
+
+				if (line_angle + 180) > top_wall_angle - top_wall_margin and (line_angle + 180) < top_wall_angle + top_wall_margin:
+					top_wall = line
+
+			Camera.left_wall = left_wall
+			Camera.right_wall = right_wall
+			Camera.top_wall = top_wall
 
 			#closest_color = Camera.colors["green"] if Camera.colors["green"]["distance"] < Camera.colors["red"]["distance"] else Camera.colors["red"]
 
@@ -194,33 +223,57 @@ class Camera:
 		h_min, s_min, v_min = config["lower"]
 		h_max, s_max, v_max = config["upper"]
 
-		# HUE mask
+		mask = None
+
 		if h_min > h_max:
-			mask1 = cv2.inRange(hsv, (0, 0, 0), (h_max, 255, 255))
-			mask2 = cv2.inRange(hsv, (h_min, 0, 0), (179, 255, 255))
-			h_mask = cv2.bitwise_or(mask1, mask2)
-		else:
-			h_mask = cv2.inRange(hsv, (h_min, 0, 0), (h_max, 255, 255))
+			lower1 = (0, 0, 0)
+			upper1 = (h_max, 255, 255)
+			mask1 = cv2.inRange(hsv, lower1, upper1)
 
-		# SATURATION mask
+			lower2 = (h_min, 0, 0)
+			upper2 = (179, 255, 255)
+			mask2 = cv2.inRange(hsv, lower2, upper2)
+
+			mask = cv2.bitwise_or(mask1, mask2)
+		else:
+			lower = (h_min, 0, 0)
+			upper = (h_max, 255, 255)
+
+			mask = cv2.inRange(hsv, lower, upper)
+
 		if s_min > s_max:
-			mask1 = cv2.inRange(hsv, (0, 0, 0), (179, s_max, 255))
-			mask2 = cv2.inRange(hsv, (0, s_min, 0), (179, 255, 255))
-			s_mask = cv2.bitwise_or(mask1, mask2)
-		else:
-			s_mask = cv2.inRange(hsv, (0, s_min, 0), (179, s_max, 255))
+			lower1 = (0, 0, 0)
+			upper1 = (179, s_max, 255)
+			mask1 = cv2.inRange(hsv, lower1, upper1)
 
-		# VALUE mask
+			lower2 = (0, s_min, 0)
+			upper2 = (179, 255, 255)
+			mask2 = cv2.inRange(hsv, lower2, upper2)
+
+			mask3 = cv2.bitwise_or(mask1, mask2)
+			mask = cv2.bitwise_and(mask, mask3)
+		else:
+			lower = (0, s_min, 0)
+			upper = (179, s_max, 255)
+			mask1 = cv2.inRange(hsv, lower, upper)
+			mask = cv2.bitwise_and(mask, mask1)
+
 		if v_min > v_max:
-			mask1 = cv2.inRange(hsv, (0, 0, 0), (179, 255, v_max))
-			mask2 = cv2.inRange(hsv, (0, 0, v_min), (179, 255, 255))
-			v_mask = cv2.bitwise_or(mask1, mask2)
-		else:
-			v_mask = cv2.inRange(hsv, (0, 0, v_min), (179, 255, v_max))
+			lower1 = (0, 0, 0)
+			upper1 = (179, 255, v_max)
+			mask1 = cv2.inRange(hsv, lower1, upper1)
 
-		# Combine all
-		mask = cv2.bitwise_and(h_mask, s_mask)
-		mask = cv2.bitwise_and(mask, v_mask)
+			lower2 = (0, 0, v_min)
+			upper2 = (179, 255, 255)
+			mask2 = cv2.inRange(hsv, lower2, upper2)
+
+			mask3 = cv2.bitwise_or(mask1, mask2)
+			mask = cv2.bitwise_and(mask, mask3)
+		else:
+			lower = (0, 0, v_min)
+			upper = (179, 255, v_max)
+			mask1 = cv2.inRange(hsv, lower, upper)
+			mask = cv2.bitwise_and(mask, mask1)
 
 		# Erode and dilate to remove noise
 		kernel = np.ones((3, 3), np.uint8)
@@ -265,7 +318,7 @@ class Camera:
 		edges = cv2.Canny(mask, 50, 150, apertureSize=3)
 
 		# Hough Line Transform (returns rho, theta)
-		lines = cv2.HoughLines(edges, 1, np.pi / 180, threshold=40)
+		lines = cv2.HoughLines(edges, 1, np.pi / 180, threshold=50)
 
 		line_segments = []
 		if lines is not None:
@@ -282,6 +335,15 @@ class Camera:
 				x2 = int(x0 - 1000 * (-b))
 				y2 = int(y0 - 1000 * a)
 
-				line_segments.append((x1, y1, x2, y2))
+				#calculate angle
+				angle = math.degrees(math.atan2(y2 - y1, x2 - x1))
+
+				# Normalize angle to be between -180 and 180
+				if angle < -180:
+					angle += 360
+				elif angle > 180:
+					angle -= 360
+				
+				line_segments.append((x1, y1, x2, y2, angle))
 
 		return line_segments
