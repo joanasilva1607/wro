@@ -1,0 +1,28 @@
+#Setup Raspberry Pi
+sudo apt-get update
+sudo raspi-config
+
+#Expand Filesystem
+#Enable SSH
+#Enable I2C
+#Reboot
+
+#Install OpenCV
+sudo apt-get install python3-opencv
+
+#Install Pi Camera
+sudo apt install -y python3-picamera2 --no-install-recommends
+
+#Install I2C SMBUS
+sudo apt-get install python3-smbus
+
+#Install Flask
+sudo apt-get install python3-flask
+
+#Install Numpy
+sudo apt-get install python3-numpy
+
+#Setup WRO Code
+git clone git@git.severino.xyz:Robotica/wro-robot.git
+
+cd wro-robot
