@@ -1,0 +1,8 @@
+#Configurar Internet
+sudo nmtui
+
+
+#Ativar hardware pwm
+# sudo nano /boot/firmware/config.txt
+[all]
+dtoverlay=pwm,pin=12,func=4

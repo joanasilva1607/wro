@@ -1,0 +1,8 @@
+Vars:
+Distancia até parede
+contagem dos cantos
+pos do obstaculo
+dist do obstaculo
+angulo do obstaculo
+canto vermelho/verde
+Relogio/anti-Relogio
