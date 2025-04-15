@@ -10,7 +10,7 @@ class Config:
 			"brightness": 0.3,
 			"crop": {
 				"left": 0,
-				"top": 280,
+				"top": 236,
 				"width": 1537,
 				"height": 864
 			},
