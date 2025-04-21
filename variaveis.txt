@@ -1,8 +1,10 @@
 Vars:
-Distancia até parede
 contagem dos cantos
+Relogio/anti-Relogio
+
+
+Distancia até parede
 pos do obstaculo
 dist do obstaculo
 angulo do obstaculo
 canto vermelho/verde
-Relogio/anti-Relogio

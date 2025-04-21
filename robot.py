@@ -3,14 +3,26 @@ from cmps12 import CMPS12
 
 from motor import Motor
 from servo import SERVO
+from srf04 import SRF04, Sonar
 
 
 class Robot:
+	sonar = []
+
 	@staticmethod
 	def init():
 		SERVO.init()
 		Motor.init()
 		CMPS12.init()
+		SERVO.set_angle(SERVO.center)
+
+		Robot.sonar = []
+
+		Robot.sonar.append(SRF04(14, 15))
+		Robot.sonar.append(SRF04(18, 23))
+		Robot.sonar.append(SRF04(24, 25))
+		Robot.sonar.append(SRF04(20, 21))
+		Robot.sonar.append(SRF04(1, 16))
 
 	@staticmethod
 	def GetAngle():
@@ -27,6 +39,10 @@ class Robot:
 
 	@staticmethod
 	def RotateAngle(angle, reverse=False):
+		Motor.stop()
+		SERVO.set_angle(SERVO.center)
+		sleep(0.5)
+
 		Robot.angle_offset = CMPS12.bearing3599() + 180 + angle
 
 		max_offset = 50
