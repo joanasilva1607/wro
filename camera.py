@@ -19,10 +19,6 @@ class Camera:
 	frame = 0
 
 	colors = {
-		"white": {
-			"detected": False,
-			"mask": None,
-		},
 		"green": {
 			"detected": False,
 			"angle": 0,
@@ -52,7 +48,7 @@ class Camera:
 				"size": (1537, 864)
 			}, 
 			controls={
-				'FrameRate': 60, 
+				'FrameRate': 20, 
 				"AwbEnable": False, 
 				"Brightness": Config.config["camera"]["brightness"],
 		}))
@@ -84,8 +80,8 @@ class Camera:
 
 		while True:
 			img = Camera.combine_colored_masks(
-				[Camera.colors[color]["mask"] for color in ["white", "green", "red"]],
-				[(255, 255, 255), (0, 255, 0), (0, 0, 255)]
+				[Camera.colors[color]["mask"] for color in ["green", "red"]],
+				[(0, 255, 0), (0, 0, 255)]
 			)
 
 			if Camera.left_wall is not None:
@@ -116,7 +112,7 @@ class Camera:
 			Camera.visuals_img = img
 
 
-			sleep(1/50)
+			sleep(1/20)
 
 	@staticmethod
 	def get_frame(frame):
@@ -138,7 +134,7 @@ class Camera:
 			if Camera.frame != last_frame:
 				last_frame = Camera.frame
 			else:
-				sleep(1/240)
+				sleep(1/40)
 				continue
 
 			hsv_img = cv2.cvtColor(Camera.img.copy(), cv2.COLOR_BGR2HSV)
@@ -150,34 +146,6 @@ class Camera:
 				if color in ["green", "red"]:
 					Camera.colors[color]["detected"], Camera.colors[color]["distance"], Camera.colors[color]["angle"], Camera.colors[color]["center"]  = Camera.process_traffic_sign(Camera.colors[color]["mask"])
 
-
-			lines = Camera.get_straight_lines_from_mask(Camera.colors["white"]["mask"])
-
-			left_wall = None
-			right_wall = None
-			top_wall = None
-
-			for line in lines:
-				x1, y1, x2, y2, line_angle = line
-
-				side_wall_angle = 12
-				side_wall_margin = 6
-
-				top_wall_angle = 180
-				top_wall_margin = 2
-
-				if abs(line_angle) > side_wall_angle - side_wall_margin and abs(line_angle) < side_wall_angle + side_wall_margin:
-					if line_angle < 0:
-						left_wall = line
-					else:	
-						right_wall = line
-
-				if (line_angle + 180) > top_wall_angle - top_wall_margin and (line_angle + 180) < top_wall_angle + top_wall_margin:
-					top_wall = line
-
-			Camera.left_wall = left_wall
-			Camera.right_wall = right_wall
-			Camera.top_wall = top_wall
 
 			#closest_color = Camera.colors["green"] if Camera.colors["green"]["distance"] < Camera.colors["red"]["distance"] else Camera.colors["red"]
 
@@ -312,38 +280,3 @@ class Camera:
 			color_mask[mask > 0] = color
 
 		return cv2.add(output, color_mask)
-
-	@staticmethod
-	def get_straight_lines_from_mask(mask):
-		edges = cv2.Canny(mask, 50, 150, apertureSize=3)
-
-		# Hough Line Transform (returns rho, theta)
-		lines = cv2.HoughLines(edges, 1, np.pi / 180, threshold=50)
-
-		line_segments = []
-		if lines is not None:
-			for line in lines:
-				rho, theta = line[0]
-				a = np.cos(theta)
-				b = np.sin(theta)
-				x0 = a * rho
-				y0 = b * rho
-
-				# Calculate two points far enough to draw the line
-				x1 = int(x0 + 1000 * (-b))
-				y1 = int(y0 + 1000 * a)
-				x2 = int(x0 - 1000 * (-b))
-				y2 = int(y0 - 1000 * a)
-
-				#calculate angle
-				angle = math.degrees(math.atan2(y2 - y1, x2 - x1))
-
-				# Normalize angle to be between -180 and 180
-				if angle < -180:
-					angle += 360
-				elif angle > 180:
-					angle -= 360
-				
-				line_segments.append((x1, y1, x2, y2, angle))
-
-		return line_segments

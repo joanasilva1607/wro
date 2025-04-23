@@ -18,7 +18,7 @@ cli.show_server_banner = lambda *x: None
 
 def feed(color=None, visuals=None):
 	while True:
-		sleep(1/20)
+		sleep(1/15)
 
 		frame = Camera.get_frame( Camera.colors[color]["mask"] if color is not None else Camera.visuals_img if visuals is not None else Camera.img)
 		yield (b'--frame\r\n'
