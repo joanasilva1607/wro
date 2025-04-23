@@ -43,7 +43,7 @@ class Robot:
 		SERVO.set_angle(SERVO.center)
 		sleep(0.5)
 
-		Robot.angle_offset = offset if offset is not None else CMPS12.bearing3599() + 180 + angle
+		Robot.angle_offset = (offset if offset is not None else CMPS12.bearing3599() + 180) + angle
 
 		max_offset = 50
 		margin = 2.5
@@ -79,8 +79,8 @@ class Robot:
 				sleep(0.2)
 				is_first_loop = False
 
-			speed_min = 0.4
-			speed_max = 0.6
+			speed_min = 0.3
+			speed_max = 0.5
 
 			speed_range = speed_max - speed_min
 			speed = speed_min + (abs(ratio) * speed_range)
