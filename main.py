@@ -13,8 +13,8 @@ from srf04 import Sonar
 from ultis import start_thread
 from cmps12 import CMPS12
 
-DEBUG = False
-OBSTACLE = False
+DEBUG = True
+OBSTACLE = True
 
 class WRO:
 	clockwise = True
@@ -40,8 +40,10 @@ class WRO:
 			start_thread(start_flask)
 			start_thread(init_my_controller)
 
+		time.sleep(1)
+
 		if OBSTACLE:
-			print("Not exist")
+			WRO.obstacle_challenge()
 		else:
 			print("Open Challenge")
 			WRO.open_challenge()
@@ -166,6 +168,43 @@ class WRO:
 
 			WRO.current_lane += 1
 			WRO.current_lap = int(WRO.current_lane / 4)
+
+	@staticmethod
+	def obstacle_challenge():
+		parking_lane_offset =  CMPS12.bearing3599() + 180
+		
+		WRO.clockwise = Robot.sonar[Sonar.FrontLeft].getCM() < Robot.sonar[Sonar.FrontRight].getCM()
+		WRO.side_sonar = Robot.sonar[Sonar.FrontLeft] if WRO.clockwise else Robot.sonar[Sonar.FrontRight]
+
+		WRO.front_sonar = Robot.sonar[Sonar.Front]
+
+		start_thread(WRO.side_sonar.start)
+		start_thread(WRO.front_sonar.start)
+
+		#Setup Colors
+		color_outside = Camera.colors["green"] if WRO.clockwise else Camera.colors["red"]
+		color_inside = Camera.colors["red"] if WRO.clockwise else Camera.colors["green"]
+
+		# Sair do estacionamento
+		Robot.RotateAngle(70 if WRO.clockwise else -70, offset=parking_lane_offset)
+		
+		time.sleep(0.5)
+
+		#Sair estacionamento
+		if color_inside["detected"]:
+			Robot.RotateAngle(30 if WRO.clockwise else -30)
+			time.sleep(0.2)
+			Motor.forward(0.7)
+			time.sleep(0.4)
+			Robot.RotateAngle(0, offset=parking_lane_offset)
+			time.sleep(1)
+		else:
+			Robot.RotateAngle(0, offset=parking_lane_offset)
+
+		# 80 dentro
+		# 20 fora
+		# 40 fora com estacionamento
+
 
 	@staticmethod
 	def init_lanes():
