@@ -38,12 +38,12 @@ class Robot:
 		return bear
 
 	@staticmethod
-	def RotateAngle(angle, reverse=False):
+	def RotateAngle(angle, reverse=False, offset=None):
 		Motor.stop()
 		SERVO.set_angle(SERVO.center)
 		sleep(0.5)
 
-		Robot.angle_offset = CMPS12.bearing3599() + 180 + angle
+		Robot.angle_offset = offset if offset is not None else CMPS12.bearing3599() + 180 + angle
 
 		max_offset = 50
 		margin = 2.5
