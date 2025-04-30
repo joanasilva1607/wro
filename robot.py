@@ -1,4 +1,5 @@
 from time import sleep
+import time
 from cmps12 import CMPS12
 
 from motor import Motor
@@ -91,3 +92,38 @@ class Robot:
 				Motor.forward(speed)
 
 			sleep(1/1000)
+
+	@staticmethod
+	def MoveLane(wall_distance=26, timeout=None, clockwise=True, wall_distance_slowdown=70, slow_lane=False, compass=True, side_sonar=None):
+		start_time = time.time()
+		while Robot.sonar[Sonar.Front].distance > 14:
+
+			if timeout is not None:
+				interval = time.time() - start_time
+
+				if interval > timeout:
+					Motor.stop()
+					return
+			
+			diff_distance = 0 if not side_sonar else (side_sonar.distance - wall_distance)
+
+			if (clockwise):
+				diff_distance = -diff_distance
+
+			diff_compass = 0 if not compass else 180 - Robot.GetAngle()
+
+			servo_angle = (diff_distance * 0.25) + (diff_compass * 0.2)
+			servo_angle = int(SERVO.center + servo_angle)
+
+			SERVO.set_angle(servo_angle)
+			
+			if slow_lane:
+				Motor.forward(0.3)
+			else:
+				Motor.forward(1 if Robot.sonar[Sonar.Front].distance > wall_distance_slowdown else 0.45)
+
+			time.sleep(1/20)
+		end_time = time.time()
+
+		duration = end_time - start_time
+		return duration
