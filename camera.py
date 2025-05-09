@@ -48,7 +48,7 @@ class Camera:
 				"size": (1537, 864)
 			}, 
 			controls={
-				'FrameRate': 20, 
+				'FrameRate': 15, 
 				"AwbEnable": False, 
 				"Brightness": Config.config["camera"]["brightness"],
 		}))
@@ -71,7 +71,7 @@ class Camera:
 			im_cp = im_cp[crop["top"]:crop["height"], crop["left"]:crop["width"]]
 
 			# Scale image down to 1/2
-			Camera.img = cv2.resize(im_cp, (0, 0), fx=0.3, fy=0.3)
+			Camera.img = im_cp #cv2.resize(im_cp, (0, 0), fx=0.3, fy=0.3)
 			Camera.frame += 1
 
 	@staticmethod
@@ -104,6 +104,9 @@ class Camera:
 
 					# Draw a line from the center of the image to the detected traffic sign
 					cv2.line(img, (img.shape[1] // 2, img.shape[0]), Camera.colors[color]["center"], (255, 0, 0), 2)
+
+					# Draw the distance of the detected traffic sign
+					cv2.putText(img, f"Distance: {Camera.colors[color]['distance']:.2f}", (Camera.colors[color]["center"][0] + 10, Camera.colors[color]["center"][1] + 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
 
 
 			# Draw frame number
@@ -182,7 +185,7 @@ class Camera:
 		if (center_x - mask.shape[1] // 2) < 0:
 			line_angle = -line_angle
 
-		line_distance = math.sqrt((center_x - mask.shape[1] // 2) ** 2 + (center_y - mask.shape[0]) ** 2)
+		line_distance = Config.config["camera"]["crop"]["height"] - center_y
 
 		return True, line_distance, line_angle, (center_x, center_y)
 	

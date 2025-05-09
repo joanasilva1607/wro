@@ -3,9 +3,9 @@
         "brightness": 0.3,
         "crop": {
             "left": 0,
-            "top": 235,
+            "top": 260,
             "width": 1537,
-            "height": 864
+            "height": 604
         },
         "colors": {
             "green": {

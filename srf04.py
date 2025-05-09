@@ -11,15 +11,15 @@ class SRF04():
 		self.trigger.off()
 
 	def start(self):
-		while self.active is True:
-			distance = self.getCM()
+		while True:
+			if self.active is True:
+				distance = self.getCM()
 
+				if distance < 7 or distance > 400:
+					continue
+
+				self.distance = distance
 			time.sleep(1/20)
-
-			if distance < 7 or distance > 400:
-				continue
-
-			self.distance = distance
 
 	def getCM(self):
 		self.trigger.on()
@@ -45,8 +45,8 @@ class SRF04():
 
 
 class Sonar:
-	BackRight = 0
-	FrontRight = 1
-	Front = 2
-	FrontLeft = 3
-	BackLeft = 4
+	#BackRight = 0
+	FrontRight = 0
+	Front = 1
+	FrontLeft = 2
+	#BackLeft = 4

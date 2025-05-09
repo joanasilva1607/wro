@@ -26,3 +26,5 @@ sudo apt-get install python3-numpy
 git clone git@git.severino.xyz:Robotica/wro-robot.git
 
 cd wro-robot
+
+sudo nano /etc/systemd/system/robot.service
