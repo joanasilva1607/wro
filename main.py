@@ -209,10 +209,11 @@ class WRO:
 		if previous_lane_alignment:
 			Robot.RotateAngle(40 if WRO.clockwise else -40)
 			Motor.forward(0.55)
-			time.sleep(0.55)
-			Robot.RotateAngle(0, relative=False)
-		else:
-			Robot.RotateAngle(0, relative=False)
+			time.sleep(0.2)
+			while Robot.sonar[Sonar.Front].distance > 25:
+				time.sleep(1/1000)
+
+		Robot.RotateAngle(0, relative=False)
 
 
 		inside = 75
@@ -266,13 +267,27 @@ class WRO:
 						)
 
 			wall_distance = inside if WRO.lanes[current_lane].initial == LaneTraffic.Inside else (outside_parking if is_first_lane else outside)
+			
+			timeout = 1
 
+			if WRO.lanes[current_lane].initial != LaneTraffic.Unkown:
+				if WRO.lanes[(current_lane + 3) % 4].final == LaneTraffic.Outside:
+					timeout += 0.6
+
+				if WRO.lanes[current_lane].initial == WRO.lanes[current_lane].final:
+					timeout += 2
+				elif WRO.lanes[current_lane].initial == LaneTraffic.Inside:
+					timeout += 0.6
+				else:
+					timeout += 0.3
+
+			print(f"Previous obstacle: {WRO.lanes[(current_lane + 3) % 4].final}, time: {timeout}")
 			Robot.MoveLane(wall_distance=wall_distance,
 					clockwise=WRO.clockwise, 
 					side_sonar=WRO.side_sonar,
 					sonar_multiplier=sonar_multiplier,
 					max_speed=0.5,
-					timeout=1.45 if WRO.current_lane <= 4 or WRO.lanes[(current_lane + 3) % 4].final == LaneTraffic.Inside else 1.75,
+					timeout=timeout,
 					until_distance=0
 					)
 
@@ -301,10 +316,10 @@ class WRO:
 
 				Motor.forward(0.4)
 				if WRO.lanes[current_lane].final == LaneTraffic.Outside and is_first_lane:
-					time.sleep(0.45)
+					time.sleep(0.3)
 				else:
 					time.sleep(0.2)
-					while Robot.sonar[Sonar.Front].distance > 15:
+					while Robot.sonar[Sonar.Front].distance > 25:
 						time.sleep(1/1000)
 
 				Robot.RotateAngle(0, relative=False)
@@ -351,15 +366,17 @@ class WRO:
 		
 		Robot.RotateAngle(90 if WRO.clockwise else -90)
 		Motor.forward(0.3)
-		time.sleep(0.15)
+		time.sleep(0.2)
 		Robot.RotateAngle(0, relative=False)
+		time.sleep(0.2)
 		Motor.forward(0.3)
-		time.sleep(1.35)
+		time.sleep(0.9)
+		Robot.RotateAngle(0, relative=False)
 		Robot.RotateAngle(90 if WRO.clockwise else -90, reverse=True)
 		Motor.backward(0.3)
-		time.sleep(0.12)
+		time.sleep(0.1)
 		Robot.RotateAngle(0, reverse=True, relative=False)
-		time.sleep(1)
+		time.sleep(0.1)
 		Robot.RotateAngle(0, relative=False)
 
 

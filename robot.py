@@ -55,7 +55,7 @@ class Robot:
 		return bear
 
 	@staticmethod
-	def RotateAngle(angle, reverse=False, relative=True):
+	def RotateAngle(angle, reverse=False, relative=True, timeout=1):
 		Motor.stop()
 
 		offset_bak = Robot.angle_offset
@@ -70,7 +70,19 @@ class Robot:
 
 		is_first_loop = True
 
+		start_time = time.time()
+
+
+
 		while True:
+			interval = time.time() - start_time
+
+			if timeout is not None:
+				if interval > timeout:
+					Motor.stop()
+					SERVO.set_angle(SERVO.center)
+					return
+
 			current_bearing = Robot.GetAngle()
 
 			if abs(current_bearing - 180) <= margin:
@@ -217,7 +229,7 @@ class Robot:
 				next_obstacle_inside = False
 				
 			#Robot.RotateAngle(-50 if next_obstacle_inside else 50, relative=True)
-			angle = 50 if next_obstacle_inside else -50
+			angle = 60 if next_obstacle_inside else -60
 			if not clockwise:
 				angle = - angle
 
@@ -226,13 +238,13 @@ class Robot:
 			Motor.forward(0.4)
 
 			if next_obstacle_inside is False and is_first_lane:
-				time.sleep(0.15)
+				time.sleep(0.18)
 			else:
 				if next_obstacle_inside:
 					time.sleep(0.35)
 				else:
 					time.sleep(0.2)
-					while Robot.sonar[Sonar.Front].distance > 15:
+					while Robot.sonar[Sonar.Front].distance > 17:
 						time.sleep(1/1000)
 			
 			Robot.RotateAngle(0, relative=False)
@@ -242,14 +254,15 @@ class Robot:
 			
 			if next_lane==LaneTraffic.Inside:
 				time.sleep(0.3)
-				Motor.backward(0.3)
-				time.sleep(1.3)
+				Robot.RotateAngle(-82 if clockwise else 82, relative=False, reverse=True)
+				Motor.backward(0.4)
+				time.sleep(0.75)
 				Motor.stop()
 				time.sleep(0.3)
 
-			Robot.RotateAngle(0, relative=False, reverse=(next_lane==LaneTraffic.Inside))
-
-			if next_lane==LaneTraffic.Inside:
-				time.sleep(0.3)
+				Robot.RotateAngle(0, relative=False, reverse=True)
+				time.sleep(0.2)
+			else:
+				Robot.RotateAngle(0, relative=False, reverse=False)
 
 			return next_lane
