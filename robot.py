@@ -1,4 +1,3 @@
-import re
 from time import sleep
 import time
 from cmps12 import CMPS12
@@ -6,7 +5,7 @@ from cmps12 import CMPS12
 from motor import Motor
 from servo import SERVO
 from srf04 import SRF04, Sonar
-
+from lane import LaneTraffic
 
 from ultis import start_thread
 
@@ -67,7 +66,7 @@ class Robot:
 			Robot.angle_offset += angle
 
 		max_offset = 50
-		margin = 2.5
+		margin = 4
 
 		is_first_loop = True
 
@@ -101,7 +100,7 @@ class Robot:
 				is_first_loop = False
 
 			speed_min = 0.4
-			speed_max = 0.8
+			speed_max = 0.7
 
 			speed_range = speed_max - speed_min
 			speed = speed_min + (abs(ratio) * speed_range)
@@ -117,6 +116,7 @@ class Robot:
 	@staticmethod
 	def MoveLane(wall_distance=26, 
 			  timeout=None, 
+			  min_timeout=None,
 			  clockwise=True, 
 			  wall_distance_slowdown=70, 
 			  slow_lane=False, 
@@ -128,13 +128,20 @@ class Robot:
 			  until_distance=14):
 		start_time = time.time()
 
-		while Robot.sonar[Sonar.Front].distance > (until_distance + 1) or Robot.sonar[Sonar.Front].distance < (until_distance - 1):
+		while True:
+			interval = time.time() - start_time
+
+			if Robot.sonar[Sonar.Front].distance > (until_distance - 1) and Robot.sonar[Sonar.Front].distance < (until_distance + 1):
+				if min_timeout is not None:
+					if interval > min_timeout:
+						break
+				else:
+					break
 
 			if timeout is not None:
-				interval = time.time() - start_time
-
 				if interval > timeout:
 					Motor.stop()
+					SERVO.set_angle(SERVO.center)
 					return
 			
 			diff_distance = 0 if not side_sonar else (side_sonar.distance - wall_distance)
@@ -142,13 +149,13 @@ class Robot:
 			if (clockwise):
 				diff_distance = -diff_distance
 
-			if abs(diff_distance) > 20:
+			if abs(diff_distance) > 30:
 				diff_distance = 0
 
 			diff_compass = 0 if not compass else 180 - Robot.GetAngle()
 
 			if compass and side_sonar:
-				if abs(diff_compass) > 25:
+				if abs(diff_compass) > 30:
 					diff_distance = 0
 
 			servo_angle = (diff_distance * sonar_multiplier) + (diff_compass * compass_multiplier)
@@ -162,9 +169,9 @@ class Robot:
 			
 			if slow_lane:
 				if Robot.sonar[Sonar.Front].distance > until_distance:
-					Motor.forward(0.5)
+					Motor.forward(0.4)
 				else:
-					Motor.backward(0.5)
+					Motor.backward(0.4)
 			else:
 				if Robot.sonar[Sonar.Front].distance > until_distance:
 					Motor.forward(max_speed if Robot.sonar[Sonar.Front].distance > wall_distance_slowdown else 0.4)
@@ -180,41 +187,69 @@ class Robot:
 		return duration
 	
 	@staticmethod
-	def ObstacleCorner(last_inside=False, color_inside=None, color_outside=None, is_first_lane=False):
-		Robot.RotateAngle(0, reverse=True, relative=False)
-		
-		if last_inside:
-			Robot.MoveLane(
-					until_distance=99999,
-					max_speed=0.6,
-					timeout=0.3
-					)
-		
-		time.sleep(0.2)
-
-		next_obstacle_inside = False
-
-		if color_inside["detected"] and color_outside["detected"]:
-			next_obstacle_inside=(color_inside["distance"] < color_outside["distance"])
-		elif color_inside["detected"]:
-			next_obstacle_inside = True
-		else:
-			next_obstacle_inside = False
+	def ObstacleCorner(last_inside=False, color_inside=None, color_outside=None, is_first_lane=False, clockwise=True, next_lane=LaneTraffic.Unkown):
+		if next_lane == LaneTraffic.Unkown:
+			Robot.RotateAngle(0, reverse=True, relative=False)
 			
-		Robot.RotateAngle(-50 if next_obstacle_inside else 50, relative=True)
-
-		Motor.forward(0.6)
-
-		if next_obstacle_inside is False and is_first_lane:
-			time.sleep(0.15)
-		else:
-			if next_obstacle_inside:
-				time.sleep(0.6)
+			if last_inside:
+				Robot.MoveLane(
+						until_distance=99999,
+						max_speed=0.4,
+						timeout=1.4
+						)
+				
 			else:
-				while Robot.sonar[Sonar.Front].distance > 23:
-					time.sleep(1/1000)
-		
-		Robot.RotateAngle(0, relative=False)
+				Robot.MoveLane(
+						until_distance=99999,
+						max_speed=0.4,
+						timeout=0.3
+						)
+			
+			Robot.RotateAngle(0, relative=False)
+			time.sleep(0.2)
 
 
-		return next_obstacle_inside
+			if color_inside["detected"] and color_outside["detected"]:
+				next_obstacle_inside=(color_inside["distance"] < color_outside["distance"])
+			elif color_inside["detected"]:
+				next_obstacle_inside = True
+			else:
+				next_obstacle_inside = False
+				
+			#Robot.RotateAngle(-50 if next_obstacle_inside else 50, relative=True)
+			angle = 50 if next_obstacle_inside else -50
+			if not clockwise:
+				angle = - angle
+
+			Robot.RotateAngle(angle, relative=False)
+
+			Motor.forward(0.4)
+
+			if next_obstacle_inside is False and is_first_lane:
+				time.sleep(0.15)
+			else:
+				if next_obstacle_inside:
+					time.sleep(0.35)
+				else:
+					time.sleep(0.2)
+					while Robot.sonar[Sonar.Front].distance > 15:
+						time.sleep(1/1000)
+			
+			Robot.RotateAngle(0, relative=False)
+
+			return LaneTraffic.Inside if next_obstacle_inside else LaneTraffic.Outside
+		else:
+			
+			if next_lane==LaneTraffic.Inside:
+				time.sleep(0.3)
+				Motor.backward(0.3)
+				time.sleep(1.3)
+				Motor.stop()
+				time.sleep(0.3)
+
+			Robot.RotateAngle(0, relative=False, reverse=(next_lane==LaneTraffic.Inside))
+
+			if next_lane==LaneTraffic.Inside:
+				time.sleep(0.3)
+
+			return next_lane

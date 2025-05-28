@@ -2,9 +2,9 @@
     "camera": {
         "brightness": 0.3,
         "crop": {
-            "left": 0,
+            "left": 96,
             "top": 260,
-            "width": 1537,
+            "width": 1441,
             "height": 604
         },
         "colors": {

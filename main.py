@@ -2,7 +2,7 @@ import os
 import time
 from camera import Camera
 from config import Config
-from lane import Lane
+from lane import Lane, LaneTraffic
 from motor import Motor
 from robot import Robot
 from mycontroller import init_my_controller
@@ -30,7 +30,7 @@ sw2.when_deactivated = ExitRobot
 
 
 DEBUG = False
-OBSTACLE = False
+OBSTACLE = True
 RUN = True
 
 class WRO:
@@ -71,9 +71,12 @@ class WRO:
 
 		print("Threads initialized")
 
+
 	@staticmethod
 	def open_challenge():
-		parking_lane_offset = 0
+		parking_lane_offset =  CMPS12.bearing3599() + 180
+		compass_offset = parking_lane_offset
+		Robot.angle_offset = compass_offset
 		wall_distance = 26
 
 		WRO.front_sonar = Robot.sonar[Sonar.Front]
@@ -86,6 +89,7 @@ class WRO:
 
 		side_distance_left = Robot.sonar[Sonar.FrontLeft].distance
 		side_distance_right = Robot.sonar[Sonar.FrontRight].distance
+
 
 
 		while WRO.current_lane < 13:
@@ -102,14 +106,14 @@ class WRO:
 			if WRO.current_lane == 0 or WRO.current_lane == 12:
 				match start_position_horizontal:
 					case 0:
-						wall_distance = 26
+						wall_distance = 45
 					case 1:
 						wall_distance = 40
 					#case 2:11
 					case _:
 						wall_distance = 60
 			else:
-				wall_distance = 26
+				wall_distance = 45
 
 			Robot.angle_offset = CMPS12.bearing3599() + 180
 
@@ -125,8 +129,15 @@ class WRO:
 							 wall_distance=wall_distance, 
 							 clockwise=WRO.clockwise,
 							 wall_distance_slowdown=40,
+							 sonar_multiplier=0.35,
+							 max_speed=0.8,
+							 until_distance=20,
 							 #slow_lane=(WRO.current_lane == 0 or WRO.current_lane == 12),
 							 side_sonar=WRO.side_sonar)
+			#Robot.RotateAngle (0, relative=False)
+			
+			if WRO.current_lane == 12:
+				return
 
 			if WRO.current_lane == 0:
 				if duration < 6:
@@ -139,8 +150,19 @@ class WRO:
 			time.sleep(0.05)
 
 			if WRO.current_lane == 0:
+				time.sleep(1)
 				WRO.clockwise = Robot.sonar[Sonar.FrontLeft].distance < Robot.sonar[Sonar.FrontRight].distance
 				WRO.side_sonar = Robot.sonar[Sonar.FrontLeft] if WRO.clockwise else Robot.sonar[Sonar.FrontRight]
+
+				if WRO.clockwise:
+					Robot.sonar[Sonar.FrontRight].active = False
+				else:
+					Robot.sonar[Sonar.FrontLeft].active = False
+
+				print(Robot.sonar[Sonar.FrontLeft].distance)
+				print(Robot.sonar[Sonar.FrontRight].distance)
+
+			
 
 			if start_position_horizontal > 0:
 				if WRO.current_lane == 11:
@@ -149,15 +171,21 @@ class WRO:
 					Motor.stop()
 					time.sleep(0.2)
 
-			Robot.RotateAngle(90 if WRO.clockwise else -90, reverse=True)
+			Robot.RotateAngle(90 if WRO.clockwise else -90, reverse=True, relative=False)
+
+			time.sleep(0.5)
+			Motor.forward(0.5)
+			time.sleep(0.5)
 
 			WRO.current_lane += 1
 			WRO.current_lap = int(WRO.current_lane / 4)
+			compass_offset += 90 if WRO.clockwise else -90
+			Robot.angle_offset = compass_offset
 		Motor.stop()
 
 	@staticmethod
 	def obstacle_challenge():
-		sonar_multiplier = 0.25
+		sonar_multiplier = 0.2
 		parking_lane_offset =  CMPS12.bearing3599() + 180
 		compass_offset = parking_lane_offset
 		Robot.angle_offset = compass_offset
@@ -177,7 +205,7 @@ class WRO:
 		color_inside = Camera.colors["red"] if WRO.clockwise else Camera.colors["green"]
 
 		# Sair do estacionamento
-		Robot.RotateAngle(60 if WRO.clockwise else -60)
+		Robot.RotateAngle(50 if WRO.clockwise else -50)
 		
 		time.sleep(1/5)
 
@@ -190,15 +218,15 @@ class WRO:
 		else:
 			previous_lane_alignment = False
 
-		if previous_lane_alignment:
-			if color_inside["distance"] > 400:
-				previous_lane_alignment = False
+		#if previous_lane_alignment:
+			#if color_inside["distance"] > 400:
+				#previous_lane_alignment = False
 
 		#Sair estacionamento
 		if previous_lane_alignment:
-			Robot.RotateAngle(30 if WRO.clockwise else -30)
+			Robot.RotateAngle(40 if WRO.clockwise else -40)
 			Motor.forward(0.55)
-			time.sleep(0.5)
+			time.sleep(0.55)
 			Robot.RotateAngle(0, relative=False)
 		else:
 			Robot.RotateAngle(0, relative=False)
@@ -216,7 +244,7 @@ class WRO:
 			sonar_multiplier=sonar_multiplier,
 			clockwise=WRO.clockwise,
 			until_distance=15,
-			max_speed=0.6,
+			max_speed=0.4,
 			wall_distance_slowdown=40
 			)
 		
@@ -227,7 +255,7 @@ class WRO:
 			sonar_multiplier=sonar_multiplier,
 			clockwise=WRO.clockwise,
 			until_distance=35,
-			max_speed=0.5
+			max_speed=0.4
 			)
 
 		WRO.current_lane = 1
@@ -236,92 +264,131 @@ class WRO:
 			compass_offset += 90 if WRO.clockwise else -90
 			Robot.angle_offset = compass_offset
 
-
-			is_first_lane = WRO.current_lane % 4 == 0	
-
+			current_lane = WRO.current_lane % 4
+			is_first_lane = current_lane == 0
 			print(f"Current lane: {WRO.current_lane} Current lap: {WRO.current_lap}")
+			print(f"Initial: {WRO.lanes[current_lane].initial}, Final: {WRO.lanes[current_lane].final}")
 
-			next_obstacle_inside = Robot.ObstacleCorner(
-						last_inside=previous_lane_alignment, 
-						color_inside=color_inside, 
-						color_outside=color_outside,
-						is_first_lane=is_first_lane
-						)
-			
-			wall_distance = inside if next_obstacle_inside else (outside_parking if is_first_lane else outside)
-
-			Robot.MoveLane(wall_distance=wall_distance,
-					clockwise=WRO.clockwise, 
-					side_sonar=WRO.side_sonar,
-					sonar_multiplier=sonar_multiplier,
-					max_speed=0.7,
-					timeout=1.4,
-					)
-			
 			if WRO.current_lane == 12:
 				Motor.stop()
 				break
 
-			
-			Robot.RotateAngle(15 if next_obstacle_inside else -15, relative=False)
-			time.sleep(1/2)
+			WRO.lanes[current_lane].initial = Robot.ObstacleCorner(
+						last_inside=previous_lane_alignment if WRO.current_lane == 1 else WRO.lanes[(current_lane + 3) % 4].final == LaneTraffic.Inside, 
+						color_inside=color_inside,
+						color_outside=color_outside,
+						is_first_lane=is_first_lane,
+						clockwise=WRO.clockwise,
+						next_lane=WRO.lanes[current_lane].initial
+						)
 
-			previous_lane_alignment = next_obstacle_inside
-			next_obstacle_inside = False
+			wall_distance = inside if WRO.lanes[current_lane].initial == LaneTraffic.Inside else (outside_parking if is_first_lane else outside)
 
-			if color_inside["detected"] and color_outside["detected"]:
-				next_obstacle_inside=(color_inside["distance"] < color_outside["distance"])
-			elif color_inside["detected"]:
-				next_obstacle_inside = True
-			else:
-				next_obstacle_inside = False
-
-
-			if next_obstacle_inside != previous_lane_alignment:
-				Robot.RotateAngle(-60 if next_obstacle_inside else 60, relative=False)
-
-				Motor.forward(0.6)
-				if next_obstacle_inside is False and is_first_lane:
-					time.sleep(0.6)
-				else:
-					while Robot.sonar[Sonar.Front].distance > 23:
-						time.sleep(1/1000)
-
-			Robot.RotateAngle(0, relative=False)
-
-			wall_distance = inside if next_obstacle_inside else (outside_parking if is_first_lane else outside)
-
-			Robot.MoveLane(wall_distance=wall_distance,
-					clockwise=WRO.clockwise, 
-					side_sonar=WRO.side_sonar,
-					sonar_multiplier=sonar_multiplier,
-					max_speed=0.6,
-					until_distance=13,
-					wall_distance_slowdown=30
-					)
-			
 			Robot.MoveLane(wall_distance=wall_distance,
 					clockwise=WRO.clockwise, 
 					side_sonar=WRO.side_sonar,
 					sonar_multiplier=sonar_multiplier,
 					max_speed=0.5,
-					until_distance=40
+					timeout=1.45 if WRO.current_lane <= 4 or WRO.lanes[(current_lane + 3) % 4].final == LaneTraffic.Inside else 1.75,
+					until_distance=0
 					)
+
+			if WRO.lanes[current_lane].final == LaneTraffic.Unkown:
+				angle = -15 if WRO.lanes[current_lane].initial == LaneTraffic.Inside else 15
+				if not WRO.clockwise:
+					angle = - angle
+
+				Robot.RotateAngle(angle, relative=False)
+
+				time.sleep(1/2)
+
+				if color_inside["detected"] and color_outside["detected"]:
+					WRO.lanes[current_lane].final = LaneTraffic.Inside if (color_inside["distance"] < color_outside["distance"]) else LaneTraffic.Outside
+				elif color_inside["detected"]:
+					WRO.lanes[current_lane].final = LaneTraffic.Inside
+				else:
+					WRO.lanes[current_lane].final = LaneTraffic.Outside
+
+			if  WRO.lanes[current_lane].initial !=  WRO.lanes[current_lane].final:
+				angle = 60 if WRO.lanes[current_lane].final == LaneTraffic.Inside else -60
+				if not WRO.clockwise:
+					angle = - angle
+
+				Robot.RotateAngle(angle, relative=False)
+
+				Motor.forward(0.4)
+				if WRO.lanes[current_lane].final == LaneTraffic.Outside and is_first_lane:
+					time.sleep(0.45)
+				else:
+					time.sleep(0.2)
+					while Robot.sonar[Sonar.Front].distance > 15:
+						time.sleep(1/1000)
+
+				Robot.RotateAngle(0, relative=False)
+			else:
+				Robot.RotateAngle(0, relative=False, reverse=True)
+
+			wall_distance = inside if WRO.lanes[current_lane].final == LaneTraffic.Inside else (outside_parking if is_first_lane else outside)
+
+			Robot.MoveLane(wall_distance=wall_distance,
+					clockwise=WRO.clockwise, 
+					side_sonar=WRO.side_sonar,
+					sonar_multiplier=sonar_multiplier,
+					max_speed=0.4,
+					until_distance=15,
+					wall_distance_slowdown=30,
+					min_timeout=2.5
+					)
+	
+			if WRO.current_lane < 5:
+				Robot.MoveLane(wall_distance=wall_distance,
+						clockwise=WRO.clockwise, 
+						side_sonar=WRO.side_sonar,
+						timeout=1.6,
+						until_distance=40
+						)
 			
-			
-			previous_lane_alignment = next_obstacle_inside
 			WRO.current_lane += 1
 			WRO.current_lap = int(WRO.current_lane / 4)
 		
+		
+		Robot.RotateAngle(0, reverse=True, relative=False)
+
+		if WRO.clockwise:
+			Motor.backward(0.4)
+			time.sleep(0.8)
+
+		Robot.MoveLane(wall_distance=13,
+			side_sonar=WRO.side_sonar,
+			sonar_multiplier=sonar_multiplier,
+			clockwise=WRO.clockwise,
+			until_distance=15,
+			max_speed=0.3
+			)
+		
+		Robot.RotateAngle(90 if WRO.clockwise else -90)
+		Motor.forward(0.3)
+		time.sleep(0.15)
+		Robot.RotateAngle(0, relative=False)
+		Motor.forward(0.3)
+		time.sleep(1.35)
+		Robot.RotateAngle(90 if WRO.clockwise else -90, reverse=True)
+		Motor.backward(0.3)
+		time.sleep(0.12)
+		Robot.RotateAngle(0, reverse=True, relative=False)
+		time.sleep(1)
+		Robot.RotateAngle(0, relative=False)
+
+
+
 
 	@staticmethod
 	def init_lanes():
+		#WRO.lanes.append(Lane(initial=LaneTraffic.Inside, final=LaneTraffic.Outside))
+		#WRO.lanes.append(Lane(initial=LaneTraffic.Outside, final=LaneTraffic.Inside))
+		#WRO.lanes.append(Lane(initial=LaneTraffic.Inside, final=LaneTraffic.Outside))
+		#WRO.lanes.append(Lane(initial=LaneTraffic.Outside, final=LaneTraffic.Inside))
 		for i in range(4):
 			WRO.lanes.append(Lane())
 
 WRO.init()
-
-# get cpu temperature
-t = os.popen('vcgencmd measure_temp').readline()
-cpu_temp = t.replace("temp=", "").replace("'C\n", "")
-print(f"CPU Temperature: {cpu_temp}°C")
