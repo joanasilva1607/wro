@@ -91,9 +91,7 @@ class WRO:
 		side_distance_right = Robot.sonar[Sonar.FrontRight].distance
 
 
-
 		while WRO.current_lane < 13:
-			#Calculate horizontal start position
 			if WRO.current_lane == 0:
 				side_distance = side_distance_left if WRO.clockwise else side_distance_right
 				if side_distance < 40:
@@ -103,7 +101,7 @@ class WRO:
 				else:
 					start_position_horizontal = 2
 
-			if WRO.current_lane == 0 or WRO.current_lane == 12:
+			if WRO.current_lane == 0:# or WRO.current_lane == 12:
 				match start_position_horizontal:
 					case 0:
 						wall_distance = 45
@@ -113,7 +111,7 @@ class WRO:
 					case _:
 						wall_distance = 60
 			else:
-				wall_distance = 45
+				wall_distance = 28
 
 			Robot.angle_offset = CMPS12.bearing3599() + 180
 
@@ -128,10 +126,10 @@ class WRO:
 			duration = Robot.MoveLane(timeout=timeout, 
 							 wall_distance=wall_distance, 
 							 clockwise=WRO.clockwise,
-							 wall_distance_slowdown=40,
-							 sonar_multiplier=0.35,
+							 wall_distance_slowdown=60,
+							 sonar_multiplier=0.2,
 							 max_speed=0.8,
-							 until_distance=20,
+							 until_distance=33,
 							 #slow_lane=(WRO.current_lane == 0 or WRO.current_lane == 12),
 							 side_sonar=WRO.side_sonar)
 			#Robot.RotateAngle (0, relative=False)
@@ -157,25 +155,10 @@ class WRO:
 				if WRO.clockwise:
 					Robot.sonar[Sonar.FrontRight].active = False
 				else:
-					Robot.sonar[Sonar.FrontLeft].active = False
+					Robot.sonar[Sonar.FrontLeft].active = False			
 
-				print(Robot.sonar[Sonar.FrontLeft].distance)
-				print(Robot.sonar[Sonar.FrontRight].distance)
+			Robot.RotateAngle(92 if WRO.clockwise else -92, reverse=False, relative=False)
 
-			
-
-			if start_position_horizontal > 0:
-				if WRO.current_lane == 11:
-					Motor.backward(0.3)
-					time.sleep(1.5 if start_position_vertical == 1 else 2.5)
-					Motor.stop()
-					time.sleep(0.2)
-
-			Robot.RotateAngle(90 if WRO.clockwise else -90, reverse=True, relative=False)
-
-			time.sleep(0.5)
-			Motor.forward(0.5)
-			time.sleep(0.5)
 
 			WRO.current_lane += 1
 			WRO.current_lap = int(WRO.current_lane / 4)
