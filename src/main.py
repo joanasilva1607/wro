@@ -277,7 +277,7 @@ class WRO:
 				if WRO.lanes[current_lane].initial == WRO.lanes[current_lane].final:
 					timeout += 2
 				elif WRO.lanes[current_lane].initial == LaneTraffic.Inside:
-					timeout += 0.6
+					timeout += 1
 				else:
 					timeout += 0.3
 
