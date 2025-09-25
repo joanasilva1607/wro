@@ -1,41 +1,18 @@
 # Robotics Club (São Gonçalo School)
 
-![CLub Image](image.png)
-
-This repository contains the documentation for the São Gonçalo School team's robot for the 2025 World Robot Olympiad Future Engineers competition. The robot, was designed and built by a team of three students.
-
-If you would like to learn more about our club, please visit our [website](https://robotica.ag-sg.net/).
-
-
+| ![Club Logo](./other/other_images/club_logo.png) | This repository contains the documentation for the São Gonçalo School team's robot for the 2025 World Robot Olympiad Future Engineers competition. The robot was designed and built by a team of two students and the help of the coach.<br>If you would like to learn more about our club, please visit our [website](https://robotica.ag-sg.net/). |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+<br>
 # The Team
 
 
 ## Joana Silva
-
-Age: 18 
-
-High School: Madeira Torres, Torres Vedras, Lisboa, Portugal
-
-Description: Hi, I'm Joana from Portugal and this is my fourth season of WRO. I've participated in this category before, but as I find it extremely challenging, there's always something to improve on. I've enjoyed challenges ever since I was little and this is another one that connects what I love: programming and robotics.
-
+| ![Joana](./t-photos/joana.jpg) | <br>Age: 18 <br>High School: Madeira Torres, Torres Vedras, Lisboa, Portugal <br> Description: Hi, I'm Joana from Portugal and this is my fourth season of WRO. I've participated in this category before, but as I find it extremely challenging, there's always something to improve on. I've enjoyed challenges ever since I was little and this is another one that connects what I love: programming and robotics. |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 
 ## Simão Freire
-
-Age: 20
-
-University: Instituito Superior de Engenharia de Lisboa, Lisboa, Portugal
-
-Description: Hi! My name is Simão and ever since I was a kid, I've been interested in computers and how they work, that led me to the path of wanting to learn more about programming and so I joined the robotics club of my school. This will be my third season in WRO and I'm really looking forward to it!
-
-
-## Rafael Teodoro
-
-Age: 16
-
-High School: Henriques Nogueira, Torres Vedras, Lisboa, Portugal
-
-Description: Hi, my name is Rafael, I took part in WRO last year and I'm very excited to do it again. This category challenges us by making us think further to solve the obstacles to the final result.
-
+| ![Simão](./t-photos/simao.jpg) | Age: 20 <br>University: Instituito Superior de Engenharia de Lisboa, Lisboa, Portugal <br> Description: Hi! My name is Simão and ever since I was a kid, I've been interested in computers and how they work, that led me to the path of wanting to learn more about programming and so I joined the robotics club of my school. This will be my third season in WRO and I'm really looking forward to it! |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 
 ## Tiago Severino (Coach)
 
@@ -43,9 +20,10 @@ Role: Coach
 
 Description: I’m hardworking, goal-oriented young man. Challenges captivate me and the harder they are, the better. Overcoming limits gives me a special taste, realizing how far I can go. I’ve already taken part in robotics competitions and now I’m leading a team with the aim of teaching what I’ve learned from my experience. I believe that the only way to get where you want to go is to never stop trying and never give until up you reach the end goal.
 
-## Theam Photo
+## Team Photo
 
-[Team photo]
+<img src="./t-photos/TeamPhoto.jpg" alt="Team photo" width="400">
+
 
 # The Challenge
 The [WRO 2025 Future Engineers - Self-Driving Cars](https://wro-association.org/) challenge invites teams to plan, build and program a robotic vehicle capable of driving autonomously on a track that changes dynamically with each round, having to be prepared for any option. The competition consists of two races: the first “Open Challenge” where the objective is to complete three laps in the direction decided before the race and stop where it started and the second “Obstacle Challenge” where the vehicle must complete 3 laps while overcoming random obstacles depending on their color and successfully perform a precise parallel parking maneuver. Teams must integrate advanced robotics concepts such as computer vision, sensor fusion and kinematics, focusing on innovation and reliability.
@@ -61,9 +39,9 @@ Points are awarded based on performance in the challenge rounds, the quality of 
 Learn more about the challenge [here](https://wro-association.org/wp-content/uploads/WRO-2025-Future-Engineers-Self-Driving-Cars-General-Rules.pdf).
 
 # Our Robot
-![Robot Image](./v-photos/TheRobot.jpeg)
+<img src="./v-photos/TheRobot.jpeg" alt="Team robot" width="400">
 
-# Our vídeo of the robot on youtube (hiperligação)
+Vídeo of the obstacle challenge in youtube [here](https://youtu.be/YTKn1OeHEFA)
 
 
 # Strategy
@@ -92,9 +70,8 @@ For optimal performance, it is essential that the robot maintains good stability
 To obtain smoother turns, we integrated axles that transmit power directly to the wheels. In order to better meet our specific requirements, we designed and built our own transmission system using a combination of a gearbox and 3D-printed gears. We employed planetary gears and machined the axles on a lathe to precisely fit the bearings that connect to the wheels.
 
 ### Potential Improvements:
-....
+ - Swap our printed gears with metal based ones to improve durability
 
-....
 
 
 ## Motor
@@ -234,6 +211,6 @@ Add a Battery Management System (BMS) for greater safety during charging and dis
       <td>Battery level sensor</td> <td>1</td> <td>8.00€</td> <td>$8.00</td>
     </tr>
     <tr>
-      <td>3D Filament</td> <td>..</td> <td>€</td> <td>20.00€</td>
+      <td>3D Filament</td> <td>1</td> <td>20.00€</td> <td>20.00€</td>
     </tr>
 </table>

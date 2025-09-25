@@ -1,1 +1,2 @@
-https://www.youtube.com/watch?v=J5yrJuZZ5P8
+
+Vídeo of the Obstacle challenge in youtube [here](https://youtu.be/YTKn1OeHEFA)
