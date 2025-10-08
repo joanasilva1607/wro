@@ -4,7 +4,12 @@ Clean separation between business logic and hardware control.
 """
 
 import time
+from machine import Pin
 from robot_controller import RobotController
+
+# Initialize status LED
+led = Pin(25, Pin.OUT)
+led.on()  # Turn on LED at boot
 
 
 class RobotApplication:
@@ -22,9 +27,12 @@ class RobotApplication:
         
         if not self.robot._is_initialized:
             print("Robot initialization failed!")
+            print("LED will remain ON - check hardware connections")
             return False
             
         print("Robot initialization complete!")
+        print("LED turned OFF - initialization successful")
+        led.off()  # Turn off LED when initialization is successful
         return True
         
     def shutdown(self):
@@ -32,12 +40,14 @@ class RobotApplication:
         print("Shutting down robot...")
         self.running = False
         self.robot.shutdown()
+        led.on()  # Turn LED back on during shutdown
         print("Robot shutdown complete.")
         
     def emergency_stop(self):
         """Emergency stop procedure."""
         print("EMERGENCY STOP!")
         self.robot.emergency_stop()
+        led.on()  # Turn LED on during emergency stop
         self.running = False
         
     def run_demo_sequence(self):
@@ -275,6 +285,7 @@ class RobotApplication:
 def main():
     """Main application entry point."""
     print("Robot Application Starting...")
+    print("LED Status: ON (initialization in progress)")
     
     # Create robot application
     app = RobotApplication()
@@ -283,11 +294,13 @@ def main():
         # Initialize robot
         if not app.initialize():
             print("Failed to initialize robot, exiting.")
+            print("LED Status: ON (initialization failed)")
             return
         
         # Check for button press at startup
         print("\nChecking for button press on pin GP22...")
         print("Press and hold the button to run Open Challenge directly, or wait 3 seconds for menu...")
+        print("LED Status: OFF (initialization successful)")
         
         # Wait for button press with 3 second timeout
         if app.robot.wait_for_button_press(timeout_ms=3000):
@@ -302,8 +315,10 @@ def main():
         
     except KeyboardInterrupt:
         print("\nApplication interrupted by user")
+        print("LED Status: ON (shutdown)")
     except Exception as e:
         print(f"Application error: {e}")
+        print("LED Status: ON (error state)")
     finally:
         # Ensure clean shutdown
         app.shutdown()
