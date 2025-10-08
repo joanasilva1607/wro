@@ -302,6 +302,10 @@ def main():
         print("Press and hold the button to run Open Challenge directly, or wait 3 seconds for menu...")
         print("LED Status: OFF (initialization successful)")
         
+        # Debug: Check button state before waiting
+        print(f"DEBUG: Button currently pressed: {app.robot.is_button_pressed()}")
+        print("DEBUG: Starting 3-second button wait...")
+        
         # Wait for button press with 3 second timeout
         if app.robot.wait_for_button_press(timeout_ms=3000):
             print("\nButton pressed! Starting Open Challenge immediately...")

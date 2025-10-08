@@ -85,11 +85,12 @@ class ButtonHAL(BaseHAL):
         if current_state and not self.last_state:
             # Check debounce time
             if current_time - self.last_press_time > self.debounce_ms:
+                print(f"DEBUG: Button press detected! (debounce: {current_time - self.last_press_time}ms)")
                 self.last_press_time = current_time
                 self.last_state = current_state
                 return True
                 
-        # Update last_state even if not pressed to track transitions
+        # Update last_state to track transitions
         self.last_state = current_state
         return False
         
@@ -109,6 +110,12 @@ class ButtonHAL(BaseHAL):
         import time
         start_time = time.ticks_ms()
         
+        # Check if button is already pressed (for boot scenarios)
+        if self.is_pressed():
+            print("DEBUG: Button already pressed at start - treating as valid press")
+            return True
+        
+        # Wait for button press
         while True:
             if self.was_pressed():
                 return True
