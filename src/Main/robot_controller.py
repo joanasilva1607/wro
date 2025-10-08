@@ -550,8 +550,8 @@ class RobotController:
                             use_compass=True,
                             use_sonar=True,
                             wall_distance=wall_distance,
-                            until_front_distance=10,  # Front stop distance
-                            blind_distance=250  # Don't check front until 250cm
+                            until_front_distance=15,  # Front stop distance
+                            blind_distance=200  # Don't check front until 250cm
                         )
                     
                     # Turn at the end of each lane (except the last lane of the last lap)
@@ -577,10 +577,56 @@ class RobotController:
                 
                 current_lap += 1
                 
-            print(f"\n🎉 OPEN CHALLENGE COMPLETED! 🎉")
+            print(f"\n🎉 OPEN CHALLENGE LAPS COMPLETED! 🎉")
             print(f"Successfully completed {target_laps} laps")
             print(f"Direction: {'CLOCKWISE' if is_clockwise else 'ANTICLOCKWISE'}")
             print(f"Total lanes completed: {lanes_completed}")
+            
+            # Add final corner and meter as requested
+            print("\n--- FINAL CORNER AND METER ---")
+            print("Making final corner turn...")
+            
+            # Calculate new target heading for final turn
+            if is_clockwise:
+                target_heading = (target_heading + 90) % 360  # Right turn
+            else:
+                target_heading = (target_heading - 90) % 360  # Left turn
+                
+            print(f"Final turn target heading: {target_heading:.1f}°")
+            
+            # Make the final corner turn
+            success = self._make_corner_turn_absolute(is_clockwise, target_heading)
+            
+            if not success:
+                print("Failed to make final corner turn")
+                return False
+                
+            print("Final corner completed!")
+            
+            # Move one more meter (100cm) after the corner using move_lane
+            print("Moving final meter (100cm) with wall following...")
+            success = self.move_lane(
+                target_cm=100,
+                relative=True,
+                clockwise=is_clockwise,
+                use_compass=True,
+                use_sonar=True,
+                wall_distance=wall_distance,
+                until_front_distance=10,  # Front stop distance
+                blind_distance=100  # Don't check front until 100cm
+            )
+            
+            if not success:
+                print("Failed to move final meter")
+                return False
+                
+            print("Final meter completed!")
+            
+            print(f"\n🎉 OPEN CHALLENGE FULLY COMPLETED! 🎉")
+            print(f"Successfully completed {target_laps} laps + final corner + final meter")
+            print(f"Direction: {'CLOCKWISE' if is_clockwise else 'ANTICLOCKWISE'}")
+            print(f"Total lanes completed: {lanes_completed}")
+            print("Final corner and meter: COMPLETED")
             
             return True
             

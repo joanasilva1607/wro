@@ -177,6 +177,7 @@ class RobotApplication:
         """Run the open challenge sequence."""
         print("Starting Open Challenge...")
         print("This will run 3 laps with automatic direction detection")
+        print("Plus one final corner and one final meter at the end")
         print("Press Ctrl+C to stop at any time")
         
         try:
