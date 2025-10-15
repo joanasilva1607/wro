@@ -210,6 +210,39 @@ class RobotApplication:
             print(f"\nOpen challenge error: {e}")
             self.robot.stop()
             
+    def run_obstacle_challenge(self):
+        """Run the obstacle challenge sequence."""
+        print("Starting Obstacle Challenge...")
+        print("This will run 3 laps with hardcoded obstacle positions")
+        print("Plus obstacle detection and avoidance at each corner")
+        print("Press Ctrl+C to stop at any time")
+        
+        try:
+            print("\nStarting obstacle challenge execution...")
+            
+            # Check if robot is initialized
+            if not self.robot._is_initialized:
+                print("ERROR: Robot is not initialized!")
+                print("Please run option 6 (Show Robot Status) to check initialization")
+                return
+                
+            print("Robot is initialized, proceeding with obstacle challenge...")
+            
+            # Run the obstacle challenge
+            success = self.robot.run_obstacle_challenge()
+            
+            if success:
+                print("\n🎉 OBSTACLE CHALLENGE COMPLETED SUCCESSFULLY! 🎉")
+            else:
+                print("\n❌ Obstacle challenge failed or was interrupted")
+                
+        except KeyboardInterrupt:
+            print("\n\nObstacle challenge interrupted by user")
+            self.robot.emergency_stop()
+        except Exception as e:
+            print(f"\nObstacle challenge error: {e}")
+            self.robot.stop()
+            
     def run_main_loop(self):
         """Run main robot operation loop."""
         print("Starting main operation loop...")
@@ -246,13 +279,14 @@ class RobotApplication:
             print("4. Calibration Sequence")
             print("5. Main Operation Loop")
             print("6. Open Challenge (3 Laps)")
-            print("7. Show Robot Status")
-            print("8. Emergency Stop")
-            print("9. Exit")
+            print("7. Obstacle Challenge (3 Laps)")
+            print("8. Show Robot Status")
+            print("9. Emergency Stop")
+            print("10. Exit")
             print("========================")
             
             try:
-                choice = input("Enter choice (1-9): ").strip()
+                choice = input("Enter choice (1-10): ").strip()
                 
                 if choice == '1':
                     self.run_demo_sequence()
@@ -268,10 +302,12 @@ class RobotApplication:
                 elif choice == '6':
                     self.run_open_challenge()
                 elif choice == '7':
-                    self.robot.print_status()
+                    self.run_obstacle_challenge()
                 elif choice == '8':
-                    self.emergency_stop()
+                    self.robot.print_status()
                 elif choice == '9':
+                    self.emergency_stop()
+                elif choice == '10':
                     break
                 else:
                     print("Invalid choice, please try again.")
@@ -315,6 +351,7 @@ def main():
             app.run_open_challenge()
         else:
             print("\nNo button press detected. Showing menu...")
+            print("Note: Use menu option 7 for Obstacle Challenge")
             # Show interactive menu
             app.show_menu()
         

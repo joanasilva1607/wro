@@ -62,8 +62,8 @@ class RobotController:
         
         # Navigation parameters from configuration
         nav_config = self._config.get_navigation_config()
-        self._default_max_speed = nav_config.get('default_max_speed', 0.8)
-        self._default_min_speed = nav_config.get('default_min_speed', 0.2)
+        self._default_max_speed = nav_config.get('default_max_speed', 0.6)
+        self._default_min_speed = nav_config.get('default_min_speed', 0.22)
         self._default_slow_distance = nav_config.get('default_slow_distance', 20)
         self._default_stop_distance = nav_config.get('default_stop_distance', 5)
         
@@ -264,6 +264,8 @@ class RobotController:
             return False
             
         self.stop()
+
+        offeset_bak = self._compass_hal.get_angle_offset()
         
         # Set target heading
         if relative:
@@ -289,6 +291,7 @@ class RobotController:
             # Check timeout
             if timeout and (time.time() - start_time) > timeout:
                 self.stop()
+                self._servo_hal.move_to_center()
                 return False
                 
             current_bearing = self._compass_hal.get_relative_heading()
@@ -298,6 +301,7 @@ class RobotController:
             # Check if target reached
             if abs(current_bearing - 180) <= margin:
                 self.stop()
+                self._servo_hal.move_to_center()
                 break
                 
             # Calculate steering adjustment
@@ -337,12 +341,13 @@ class RobotController:
                 self.move_forward(speed)
                 
             time.sleep(0.0002)  # Control loop delay
-            
+        
+        self._compass_hal.set_angle_offset(offeset_bak)
         return True
         
     def move_lane(self, target_cm, relative=True, clockwise=True, wall_distance=50,
                   use_sonar=False, use_compass=True, sonar_multiplier=0.25, 
-                  compass_multiplier=0.1, until_front_distance=15, blind_distance=200):
+                  compass_multiplier=0.1, until_front_distance=15, blind_distance=0):
         """
         Move along a lane with wall following and compass guidance.
         
@@ -418,7 +423,7 @@ class RobotController:
                     side_distance = sensor_data.get('right', wall_distance)  # Outside wall is on the right
                     diff_distance = (side_distance - wall_distance)  # Invert for right wall following
                 
-                if abs(diff_distance) > 50:
+                if abs(diff_distance) > 30:
                     diff_distance = 0
                     
             diff_compass = 0
@@ -1146,3 +1151,405 @@ class RobotController:
         if self._button_hal.is_initialized():
             return self._button_hal.wait_for_press(timeout_ms)
         return False
+        
+    def obstacle_corner(self, last_inside=False, color_inside=None, color_outside=None, 
+                       is_first_lane=False, clockwise=True, next_lane=None):
+        """
+        Handle obstacle detection at corners for the obstacle challenge.
+        
+        Args:
+            last_inside: Whether the previous lane ended inside
+            color_inside: Color detection data for inside position
+            color_outside: Color detection data for outside position
+            is_first_lane: Whether this is the first lane
+            clockwise: Direction of movement
+            next_lane: Next lane traffic position (if known)
+            
+        Returns:
+            LaneTraffic: Detected traffic position
+        """
+        from lane import LaneTraffic
+        
+        if next_lane is None or next_lane == LaneTraffic.Unknown:
+            # Need to detect the obstacle position
+            self.rotate_angle(0, reverse=True, relative=False)
+            
+            if last_inside:
+                # Move forward to get better detection
+                self.move_lane(
+                    target_cm=99999,
+                    relative=True,
+                    use_compass=False,
+                    use_sonar=False
+                )
+            else:
+                # Move forward briefly
+                self.move_lane(
+                    target_cm=99999,
+                    relative=True,
+                    use_compass=False,
+                    use_sonar=False
+                )
+            
+            self.rotate_angle(0, relative=False)
+            time.sleep(0.2)
+            
+            # Simulate color detection (hardcoded for now)
+            # In future implementation, this would use actual camera data
+            if color_inside and color_outside:
+                next_obstacle_inside = (color_inside.get("detected", False) and 
+                                      color_outside.get("detected", False) and
+                                      color_inside.get("distance", 999) < color_outside.get("distance", 999))
+            elif color_inside and color_inside.get("detected", False):
+                next_obstacle_inside = True
+            else:
+                next_obstacle_inside = False
+                
+            # Make the turn to avoid the obstacle
+            angle = 60 if next_obstacle_inside else -60
+            if not clockwise:
+                angle = -angle
+                
+            self.rotate_angle(angle, relative=False)
+            
+            # Move forward to clear the obstacle
+            self.move_forward(0.4)
+            
+            if not next_obstacle_inside and is_first_lane:
+                time.sleep(0.18)
+            else:
+                if next_obstacle_inside:
+                    time.sleep(0.35)
+                else:
+                    time.sleep(0.2)
+                    # Check for front obstacle
+                    sensor_data = self._get_sensor_data()
+                    front_distance = sensor_data.get('front', 255)
+                    while front_distance > 17:
+                        time.sleep(0.001)
+                        sensor_data = self._get_sensor_data()
+                        front_distance = sensor_data.get('front', 255)
+            
+            self.rotate_angle(0, relative=False)
+            
+            return LaneTraffic.Inside if next_obstacle_inside else LaneTraffic.Outside
+            
+        else:
+            # Use known next lane position
+            if next_lane == LaneTraffic.Inside:
+                self.rotate_angle(0, relative=False, reverse=True)
+            else:
+                self.rotate_angle(0, relative=False, reverse=False)
+                
+            time.sleep(0.2)
+
+            return next_lane
+            
+    def run_obstacle_challenge(self, hardcoded_lanes=None):
+        """
+        Run the obstacle challenge with hardcoded lane positions.
+        
+        Args:
+            hardcoded_lanes: List of Lane objects with hardcoded positions (optional)
+        """
+        from lane import Lane, LaneTraffic
+        
+        print("=== STARTING OBSTACLE CHALLENGE ===")
+        
+        if not self._is_initialized:
+            print("ERROR: Robot not initialized!")
+            return False
+            
+        # Initialize hardcoded lane positions if not provided
+        if hardcoded_lanes is None:
+            # Default hardcoded lane configuration
+            hardcoded_lanes = [
+                Lane(LaneTraffic.Inside, LaneTraffic.Outside),   # Lane 0
+                Lane(LaneTraffic.Outside, LaneTraffic.Inside),   # Lane 1
+                Lane(LaneTraffic.Inside, LaneTraffic.Outside),   # Lane 2
+                Lane(LaneTraffic.Outside, LaneTraffic.Inside),   # Lane 3
+            ]
+            
+        print(f"Using {len(hardcoded_lanes)} hardcoded lane positions")
+        
+        # Challenge state
+        current_lane = 0
+        current_lap = 0
+        clockwise = None
+        side_sonar = None
+        
+        # Set reference position and get absolute heading
+        self._encoder_hal.set_reference_position()
+        initial_heading = self._compass_hal.get_heading()
+        if initial_heading is None:
+            print("ERROR: Cannot get initial compass heading!")
+            return False
+            
+        compass_offset = initial_heading + 180
+        self._compass_hal.set_angle_offset(compass_offset)
+        
+        # Detect direction using sonar
+        print("Detecting track direction...")
+        sensor_data = self._get_sensor_data()
+        left_distance = sensor_data.get('left', 0)
+        right_distance = sensor_data.get('right', 0)
+        
+        clockwise = left_distance < right_distance
+        side_sonar = 'left' if clockwise else 'right'
+        
+        print(f"Direction detected: {'CLOCKWISE' if clockwise else 'ANTICLOCKWISE'}")
+        print(f"Following {side_sonar} wall")
+        
+        # Simulate color detection data (hardcoded for now)
+        color_outside = {"detected": True, "distance": 30}
+        color_inside = {"detected": True, "distance": 50}
+        
+        try:
+            # Exit parking area
+            print("Exiting parking area...")
+            self.rotate_angle(50 if clockwise else -50)
+            time.sleep(0.2)
+            
+            # Check initial lane alignment
+            previous_lane_alignment = False
+            if color_inside["detected"] and color_outside["detected"]:
+                previous_lane_alignment = (color_inside["distance"] < color_outside["distance"])
+            elif color_inside["detected"]:
+                previous_lane_alignment = True
+            else:
+                previous_lane_alignment = False
+                
+            # Exit parking based on alignment
+            if previous_lane_alignment:
+                self.rotate_angle(40 if clockwise else -40)
+                self.move_forward(0.55)
+                time.sleep(0.2)
+                sensor_data = self._get_sensor_data()
+                front_distance = sensor_data.get('front', 255)
+                while front_distance > 25:
+                    time.sleep(0.001)
+                    sensor_data = self._get_sensor_data()
+                    front_distance = sensor_data.get('front', 255)
+            else:
+                self.move_forward(0.55)
+                time.sleep(0.2)
+                    
+            self.rotate_angle(0, relative=False)
+            
+            # Set up wall distances
+            inside = 70
+            outside = 17
+            outside_parking = 37
+            
+            wall_distance = inside if previous_lane_alignment else outside_parking
+            
+            # Move to first lane
+            print("Moving to first lane...")
+            self.move_lane(
+                target_cm=250,
+                relative=True,
+                clockwise=clockwise,
+                wall_distance=wall_distance,
+                use_sonar=True,
+                use_compass=True,
+                until_front_distance=25,
+                blind_distance=50
+            )
+            
+        
+            
+            current_lane = 1
+            
+            # Main obstacle challenge loop
+            while current_lane <= 12:  # 3 laps * 4 lanes = 12 total lanes
+                compass_offset += 90 if clockwise else -90
+                self._compass_hal.set_angle_offset(compass_offset)
+                
+                lane_index = current_lane % 4
+                next_lane_index = (lane_index + 1) % 4
+                is_first_lane = lane_index == 0
+                
+                print(f"\n--- Lane {current_lane} (Lap {current_lap + 1}) ---")
+                print(f"Lane position: {hardcoded_lanes[lane_index]}")
+                
+                if current_lane == 12:
+                    print("Final lane reached!")
+                    self.stop()
+                    break
+                    
+                # Detect obstacle at corner
+                previous_lane_final = (hardcoded_lanes[(lane_index + 3) % 4].final 
+                                     if current_lane > 1 else LaneTraffic.Unknown)
+                
+                detected_position = self.obstacle_corner(
+                    last_inside=(previous_lane_final == LaneTraffic.Inside),
+                    color_inside=color_inside,
+                    color_outside=color_outside,
+                    is_first_lane=is_first_lane,
+                    clockwise=clockwise,
+                    next_lane=hardcoded_lanes[lane_index].initial
+                )
+                
+                # Update lane with detected position
+                hardcoded_lanes[lane_index].initial = detected_position
+                
+                # Set wall distance based on position
+                wall_distance = (inside if hardcoded_lanes[lane_index].initial == LaneTraffic.Inside 
+                               else (outside_parking if is_first_lane else outside))
+                
+                #get rear sensor data
+                sensor_data = self._get_sensor_data()
+                rear_distance = sensor_data.get('rear', 255)
+
+                target_distance = 105 - rear_distance
+
+                # Move along the lane
+                self.move_lane(
+                    target_cm=target_distance,
+                    relative=True,
+                    clockwise=clockwise,
+                    wall_distance=wall_distance,
+                    use_sonar=True,
+                    use_compass=True,
+                    until_front_distance=0
+                )
+
+                # Detect final position if unknown
+                if hardcoded_lanes[lane_index].final == LaneTraffic.Unknown:
+                    angle = -15 if hardcoded_lanes[lane_index].initial == LaneTraffic.Inside else 15
+                    if not clockwise:
+                        angle = -angle
+                        
+                    self.rotate_angle(angle, relative=False)
+                    time.sleep(0.5)
+                    
+                    # Simulate final position detection
+                    if color_inside["detected"] and color_outside["detected"]:
+                        hardcoded_lanes[lane_index].final = (LaneTraffic.Inside 
+                                                           if (color_inside["distance"] < color_outside["distance"]) 
+                                                           else LaneTraffic.Outside)
+                    elif color_inside["detected"]:
+                        hardcoded_lanes[lane_index].final = LaneTraffic.Inside
+                    else:
+                        hardcoded_lanes[lane_index].final = LaneTraffic.Outside
+                        
+                # Handle position change if needed
+                if hardcoded_lanes[lane_index].initial != hardcoded_lanes[lane_index].final:
+                    angle = 70 if hardcoded_lanes[lane_index].final == LaneTraffic.Inside else -70
+                    if not clockwise:
+                        angle = -angle
+                        
+                    self.rotate_angle(angle, relative=False)
+                    
+                    self.move_forward(0.35)
+                    if (hardcoded_lanes[lane_index].final == LaneTraffic.Outside and is_first_lane):
+                        sensor_data = self._get_sensor_data()
+                        rear_distance = sensor_data.get('rear', 255)
+                        while rear_distance < 42:
+                            time.sleep(0.001)
+                            sensor_data = self._get_sensor_data()
+                            rear_distance = sensor_data.get('rear', 255)
+
+                    else:
+                        sensor_data = self._get_sensor_data()
+                        front_distance = sensor_data.get('front', 255)
+                        while front_distance > 30:
+                            time.sleep(0.001)
+                            sensor_data = self._get_sensor_data()
+                            front_distance = sensor_data.get('front', 255)
+                            
+                    self.rotate_angle(0, relative=False)
+                else:
+                    self.rotate_angle(0, relative=False, reverse=True)
+                    
+                # Set final wall distance
+                wall_distance = (inside if hardcoded_lanes[lane_index].final == LaneTraffic.Inside 
+                               else (outside_parking if is_first_lane else outside))
+                
+                target_distance = 50
+                if current_lane == 11:
+                    target_distance = 20
+                elif hardcoded_lanes[next_lane_index].initial == LaneTraffic.Unknown:
+                    target_distance = 57
+                elif hardcoded_lanes[next_lane_index].initial == LaneTraffic.Inside:
+                    target_distance = 57
+                else:
+                    if next_lane_index == 0:
+                        target_distance = 42
+                    else:
+                        target_distance = 25
+
+                # Move to next corner
+                print("Moving to next corner...")
+                self.move_lane(
+                    target_cm=200,
+                    relative=True,
+                    clockwise=clockwise,
+                    wall_distance=wall_distance,
+                    use_sonar=True,
+                    use_compass=True,
+                    until_front_distance=target_distance,
+                    blind_distance=100
+                )
+                
+                # Additional movement for first few lanes
+                if False: # current_lane < 5:
+                    self.move_lane(
+                        target_cm=99999,
+                        relative=True,
+                        clockwise=clockwise,
+                        wall_distance=wall_distance,
+                        use_sonar=True,
+                        use_compass=True,
+                        until_front_distance=40
+                    )
+                    
+                current_lane += 1
+                current_lap = int(current_lane / 4)
+                
+            # Final parking sequence
+            print("\n--- FINAL PARKING SEQUENCE ---")
+            
+            
+            self.rotate_angle(0, reverse=clockwise, relative=False)
+            
+            if clockwise:
+                self.move_backward(0.4)
+                time.sleep(0.8)
+                
+            self.move_lane(
+                target_cm=99999,
+                relative=True,
+                clockwise=clockwise,
+                wall_distance=12,
+                use_sonar=True,
+                use_compass=True,
+                until_front_distance=12
+            )
+            
+            self.rotate_angle(90 if clockwise else -90)
+            self.move_forward(0.3)
+            time.sleep(0.2)
+            self.rotate_angle(0, relative=False)
+            time.sleep(0.2)
+            self.move_forward(0.3)
+            time.sleep(0.9)
+            self.rotate_angle(0, relative=False)
+            self.rotate_angle(90 if clockwise else -90, reverse=True)
+            self.move_backward(0.3)
+            time.sleep(0.1)
+            self.rotate_angle(0, reverse=True, relative=False)
+            time.sleep(0.1)
+            self.rotate_angle(0, relative=False)
+            
+            print("\n🎉 OBSTACLE CHALLENGE COMPLETED! 🎉")
+            return True
+            
+        except KeyboardInterrupt:
+            print("\nObstacle challenge interrupted by user")
+            return False
+        except Exception as e:
+            print(f"Obstacle challenge failed: {e}")
+            return False
+        finally:
+            self.stop()
