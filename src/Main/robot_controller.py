@@ -1393,7 +1393,7 @@ class RobotController:
             self.rotate_angle(0, relative=False)
             
             # Set up wall distances
-            inside = 78
+            inside = 80
             outside = 17
             outside_parking = 35
             
@@ -1414,9 +1414,11 @@ class RobotController:
         
             
             current_lane = 1
+            number_laps = 10
+
             
             # Main obstacle challenge loop
-            while current_lane <= 12:  # 3 laps * 4 lanes = 12 total lanes
+            while current_lane <= number_laps*4:  # 3 laps * 4 lanes = 12 total lanes
                 compass_offset += 90 if clockwise else -90
                 self._compass_hal.set_angle_offset(compass_offset)
                 
@@ -1427,7 +1429,7 @@ class RobotController:
                 print(f"\n--- Lane {current_lane} (Lap {current_lap + 1}) ---")
                 print(f"Lane position: {hardcoded_lanes[lane_index]}")
                 
-                if current_lane == 12:
+                if current_lane == number_laps*4:
                     print("Final lane reached!")
                     self.stop()
                     break
@@ -1507,7 +1509,7 @@ class RobotController:
                     else:
                         sensor_data = self._get_sensor_data()
                         front_distance = sensor_data.get('front', 255)
-                        while front_distance > 25:
+                        while front_distance > 20:
                             time.sleep(0.001)
                             sensor_data = self._get_sensor_data()
                             front_distance = sensor_data.get('front', 255)
@@ -1521,12 +1523,12 @@ class RobotController:
                                else (outside_parking if is_first_lane else outside))
                 
                 target_distance = 50
-                if current_lane == 11:
+                if current_lane == (number_laps*4)-1:
                     target_distance = 18
                 elif hardcoded_lanes[next_lane_index].initial == LaneTraffic.Unknown:
                     target_distance = 50
                 elif hardcoded_lanes[next_lane_index].initial == LaneTraffic.Inside:
-                    target_distance = 60
+                    target_distance = 63
                 else:
                     if next_lane_index == 0:
                         target_distance = 38
