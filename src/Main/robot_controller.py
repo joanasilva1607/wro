@@ -345,14 +345,13 @@ class RobotController:
         self._compass_hal.set_angle_offset(offeset_bak)
         return True
         
-    def move_lane(self, target_cm, relative=True, clockwise=True, wall_distance=50,
-                  use_sonar=False, use_compass=True, sonar_multiplier=0.25, 
-                  compass_multiplier=0.1, until_front_distance=15, blind_distance=0):
+    def move_lane(self, target_cm=None, relative=True, clockwise=True, wall_distance=50,
+                  use_sonar=False, use_compass=False, until_front_distance=None, blind_distance=0):
         """
         Move along a lane with wall following and compass guidance.
         
         Args:
-            target_cm: Target distance to move
+            target_cm: Target distance to move (use either this OR until_front_distance, not both)
             relative: Move relative to current position
             clockwise: Direction of movement
             wall_distance: Desired distance from wall (if using sonar)
@@ -360,16 +359,38 @@ class RobotController:
             use_compass: Enable compass-based heading correction
             sonar_multiplier: Weight for sonar correction
             compass_multiplier: Weight for compass correction
+            until_front_distance: Stop when front sonar distance reaches this value (use either this OR target_cm, not both)
+            blind_distance: Distance to travel before checking front obstacle
         """
         if not self._is_initialized:
             return False
             
-        # Set target distance
-        if relative:
-            self._encoder_hal.set_reference_position()
-            target_distance = target_cm
+        # Validate parameters - use either target_cm OR until_front_distance, not both
+        if target_cm is not None and until_front_distance is not None:
+            raise ValueError("Cannot use both target_cm and until_front_distance simultaneously. Choose one.")
+        if target_cm is None and until_front_distance is None:
+            raise ValueError("Must specify either target_cm or until_front_distance.")
+
+        compass_multiplier=0.1
+        sonar_multiplier=0.25 / ( wall_distance / 25)
+
+            
+        # Determine movement mode
+        use_distance_mode = target_cm is not None
+        use_front_distance_mode = until_front_distance is not None
+        
+        # Set target distance for distance-based mode
+        if use_distance_mode:
+            if relative:
+                self._encoder_hal.set_reference_position()
+                target_distance = target_cm
+            else:
+                target_distance = target_cm
+                initial_distance = self._encoder_hal.get_distance_cm()
         else:
-            target_distance = target_cm
+            # For front distance mode, we still need to track distance for deceleration
+            if relative:
+                self._encoder_hal.set_reference_position()
             initial_distance = self._encoder_hal.get_distance_cm()
             
         # Movement parameters
@@ -386,26 +407,40 @@ class RobotController:
             fresh_data = self.get_fresh_sensor_data()
             sensor_data = fresh_data['data']
             
-            # Calculate distance corrections
+            # Calculate current distance
             if relative:
                 current_distance = self._encoder_hal.get_relative_distance_cm()
-                diff = target_distance - current_distance
-                initial_diff = current_distance
             else:
                 current_distance = self._encoder_hal.get_distance_cm()
-                diff = target_distance - current_distance
                 initial_diff = current_distance - initial_distance
                 
-            # Check if target reached
-            if diff <= 0:
-                break
-                
             # Check for front obstacle only after blind distance
+            front_distance = None
             if sensor_data and current_distance >= blind_distance:
                 front_distance = sensor_data.get('front', 255)
-                if front_distance <= until_front_distance:
+                
+            # Handle different movement modes
+            if use_distance_mode:
+                # Distance-based mode
+                diff = target_distance - current_distance
+                initial_diff = current_distance
+                
+                # Check if target reached
+                if diff <= 0:
+                    break
+                    
+            else:
+                # Front distance mode
+                if front_distance is not None and front_distance <= until_front_distance:
                     print(f"Front obstacle detected at {front_distance}cm after {current_distance:.1f}cm travel, stopping")
                     break
+                    
+                # For front distance mode, we use front distance difference for deceleration
+                if front_distance is not None:
+                    diff = front_distance - until_front_distance
+                else:
+                    diff = 0  # No front sensor data, maintain current speed
+                initial_diff = current_distance
                 
             reverse = diff < 0
             if reverse:
@@ -450,20 +485,44 @@ class RobotController:
                 speed = min_speed + (speed_interval * (initial_diff - stop_distance) / distance_interval)
                 
             # Deceleration phase
-            if diff < stop_distance:
-                speed = min_speed
-            elif diff < slow_distance:
-                if not slowdown_started:
-                    slowdown_started = True
-                    max_speed = prev_speed
-                    
-                speed_interval = max_speed - min_speed
-                distance_interval = slow_distance - stop_distance
-                speed = min_speed + (speed_interval * (diff - stop_distance) / distance_interval)
+            if use_distance_mode:
+                # Distance-based deceleration
+                if diff < stop_distance:
+                    speed = min_speed
+                elif diff < slow_distance:
+                    if not slowdown_started:
+                        slowdown_started = True
+                        max_speed = prev_speed
+                        
+                    speed_interval = max_speed - min_speed
+                    distance_interval = slow_distance - stop_distance
+                    speed = min_speed + (speed_interval * (diff - stop_distance) / distance_interval)
+            else:
+                # Front distance-based deceleration (only after blind_distance)
+                if current_distance >= blind_distance and front_distance is not None:
+                    front_diff = front_distance - until_front_distance
+                    if front_diff < stop_distance:
+                        speed = min_speed
+                    elif front_diff < slow_distance:
+                        if not slowdown_started:
+                            slowdown_started = True
+                            max_speed = prev_speed
+                            
+                        speed_interval = max_speed - min_speed
+                        distance_interval = slow_distance - stop_distance
+                        speed = min_speed + (speed_interval * (front_diff - stop_distance) / distance_interval)
+                else:
+                    # Before blind_distance, use normal acceleration phase
+                    # (acceleration phase logic is already handled above)
+                    pass
                 
             # Adjust steering based on speed
             servo_angle = servo_angle / speed * max_speed
             servo_angle = int(self._servo_hal.center_steering + servo_angle)
+
+
+            if speed < self._default_min_speed:
+                speed = self._default_min_speed
             
             # Apply movement and steering
             if reverse:
@@ -549,7 +608,6 @@ class RobotController:
                         print(f"Following {wall_side} wall at {wall_distance}cm distance")
                         
                         success = self.move_lane(
-                            target_cm=250,
                             relative=True,
                             clockwise=is_clockwise,
                             use_compass=True,
@@ -617,8 +675,6 @@ class RobotController:
                 use_compass=True,
                 use_sonar=True,
                 wall_distance=wall_distance,
-                until_front_distance=10,  # Front stop distance
-                blind_distance=100  # Don't check front until 100cm
             )
             
             if not success:
@@ -1337,16 +1393,15 @@ class RobotController:
             self.rotate_angle(0, relative=False)
             
             # Set up wall distances
-            inside = 70
+            inside = 78
             outside = 17
-            outside_parking = 37
+            outside_parking = 35
             
             wall_distance = inside if previous_lane_alignment else outside_parking
             
             # Move to first lane
             print("Moving to first lane...")
             self.move_lane(
-                target_cm=250,
                 relative=True,
                 clockwise=clockwise,
                 wall_distance=wall_distance,
@@ -1401,7 +1456,7 @@ class RobotController:
                 sensor_data = self._get_sensor_data()
                 rear_distance = sensor_data.get('rear', 255)
 
-                target_distance = 105 - rear_distance
+                target_distance = 115 - rear_distance
 
                 # Move along the lane
                 self.move_lane(
@@ -1410,8 +1465,7 @@ class RobotController:
                     clockwise=clockwise,
                     wall_distance=wall_distance,
                     use_sonar=True,
-                    use_compass=True,
-                    until_front_distance=0
+                    use_compass=True
                 )
 
                 # Detect final position if unknown
@@ -1445,7 +1499,7 @@ class RobotController:
                     if (hardcoded_lanes[lane_index].final == LaneTraffic.Outside and is_first_lane):
                         sensor_data = self._get_sensor_data()
                         rear_distance = sensor_data.get('rear', 255)
-                        while rear_distance < 42:
+                        while rear_distance < 55:
                             time.sleep(0.001)
                             sensor_data = self._get_sensor_data()
                             rear_distance = sensor_data.get('rear', 255)
@@ -1453,7 +1507,7 @@ class RobotController:
                     else:
                         sensor_data = self._get_sensor_data()
                         front_distance = sensor_data.get('front', 255)
-                        while front_distance > 30:
+                        while front_distance > 25:
                             time.sleep(0.001)
                             sensor_data = self._get_sensor_data()
                             front_distance = sensor_data.get('front', 255)
@@ -1468,34 +1522,32 @@ class RobotController:
                 
                 target_distance = 50
                 if current_lane == 11:
-                    target_distance = 20
+                    target_distance = 18
                 elif hardcoded_lanes[next_lane_index].initial == LaneTraffic.Unknown:
-                    target_distance = 57
+                    target_distance = 50
                 elif hardcoded_lanes[next_lane_index].initial == LaneTraffic.Inside:
-                    target_distance = 57
+                    target_distance = 60
                 else:
                     if next_lane_index == 0:
-                        target_distance = 42
+                        target_distance = 38
                     else:
                         target_distance = 25
 
                 # Move to next corner
                 print("Moving to next corner...")
                 self.move_lane(
-                    target_cm=200,
                     relative=True,
                     clockwise=clockwise,
                     wall_distance=wall_distance,
                     use_sonar=True,
                     use_compass=True,
                     until_front_distance=target_distance,
-                    blind_distance=100
+                    blind_distance=70
                 )
                 
                 # Additional movement for first few lanes
                 if False: # current_lane < 5:
                     self.move_lane(
-                        target_cm=99999,
                         relative=True,
                         clockwise=clockwise,
                         wall_distance=wall_distance,
@@ -1514,33 +1566,63 @@ class RobotController:
             self.rotate_angle(0, reverse=clockwise, relative=False)
             
             if clockwise:
-                self.move_backward(0.4)
-                time.sleep(0.8)
+                self.rotate_angle(90, reverse=True, relative=False)
+                self.rotate_angle(0, reverse=True, relative=False)
+
                 
             self.move_lane(
-                target_cm=99999,
                 relative=True,
                 clockwise=clockwise,
-                wall_distance=12,
+                wall_distance=10,
                 use_sonar=True,
                 use_compass=True,
                 until_front_distance=12
             )
-            
+
+
             self.rotate_angle(90 if clockwise else -90)
-            self.move_forward(0.3)
-            time.sleep(0.2)
+            
+            sensor_data = self._get_sensor_data()
+            rear_distance = sensor_data.get('rear', 255)
+            self.move_lane(
+                relative=True,
+                clockwise=clockwise,
+                use_compass=True,
+                target_cm=18-rear_distance
+            )
+
             self.rotate_angle(0, relative=False)
             time.sleep(0.2)
-            self.move_forward(0.3)
-            time.sleep(0.9)
-            self.rotate_angle(0, relative=False)
+
+            self.move_forward(0.2)
+            self.move_lane(
+                relative=True,
+                clockwise=clockwise,
+                use_compass=True,
+                target_cm=24.5
+            )
+
             self.rotate_angle(90 if clockwise else -90, reverse=True)
-            self.move_backward(0.3)
-            time.sleep(0.1)
+
+            sensor_data = self._get_sensor_data()
+            rear_distance = sensor_data.get('rear', 255)
+            self.move_lane(
+                relative=True,
+                clockwise=clockwise,
+                target_cm=18-rear_distance
+            )
+
             self.rotate_angle(0, reverse=True, relative=False)
             time.sleep(0.1)
-            self.rotate_angle(0, relative=False)
+
+            sensor_data = self._get_sensor_data()
+            rear_distance = sensor_data.get('rear', 255)
+            self.move_lane(
+                relative=True,
+                clockwise=clockwise,
+                use_compass=True,
+                target_cm=4 - rear_distance
+            )
             
             print("\n🎉 OBSTACLE CHALLENGE COMPLETED! 🎉")
             return True

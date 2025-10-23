@@ -23,20 +23,35 @@ The button is configured in `config.py`:
 
 ### Startup Behavior
 1. When the robot starts, it will check for button press for 3 seconds
-2. If button is pressed during this time, it runs Open Challenge directly (no keyboard confirmation needed)
+2. If button is pressed during this time, it will:
+   - Read front and rear sonar distances
+   - Calculate the sum of both distances
+   - If sum > 100cm (1 meter): Start Open Challenge
+   - If sum ≤ 100cm: Start Obstacle Challenge
+   - If sonar data unavailable: Default to Open Challenge
 3. If no button press is detected, it shows the normal menu
 
 ### Testing
-Run the test script to verify button functionality:
+Run the test scripts to verify button functionality:
+
+**Basic button test:**
 ```bash
 python test_button.py
+```
+
+**Sonar distance logic test:**
+```bash
+python test_button_sonar_logic.py
 ```
 
 ### Manual Testing
 You can also test the button in the main application:
 1. Run `python main.py`
 2. Press and hold the button during the 3-second startup check
-3. The robot will automatically start the Open Challenge without any keyboard input required
+3. The robot will:
+   - Read sonar distances and display them
+   - Automatically choose the appropriate challenge based on the distance sum
+   - Start the selected challenge without any keyboard input required
 
 ## Technical Details
 

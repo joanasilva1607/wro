@@ -345,10 +345,36 @@ def main():
         
         # Wait for button press with 3 second timeout
         if app.robot.wait_for_button_press(timeout_ms=3000):
-            print("\nButton pressed! Starting Open Challenge immediately...")
-            print("Challenge will begin in 2 seconds...")
-            time.sleep(2)  # Give user time to see the message
-            app.run_open_challenge()
+            print("\nButton pressed! Checking sonar distances to determine challenge...")
+            
+            # Get fresh sonar data
+            fresh_data = app.robot.get_fresh_sensor_data()
+            sensor_data = fresh_data['data']
+            
+            if sensor_data:
+                front_distance = sensor_data.get('front', 0)
+                rear_distance = sensor_data.get('rear', 0)
+                total_distance = front_distance + rear_distance
+                
+                print(f"Sonar readings - Front: {front_distance}cm, Rear: {rear_distance}cm")
+                print(f"Total distance: {total_distance}cm")
+                
+                # Decide challenge based on total distance
+                if total_distance > 100:  # More than 1 meter
+                    print("Total distance > 100cm - Starting Open Challenge...")
+                    print("Challenge will begin in 2 seconds...")
+                    time.sleep(2)  # Give user time to see the message
+                    app.run_open_challenge()
+                else:
+                    print("Total distance <= 100cm - Starting Obstacle Challenge...")
+                    print("Challenge will begin in 2 seconds...")
+                    time.sleep(2)  # Give user time to see the message
+                    app.run_obstacle_challenge()
+            else:
+                print("Could not read sonar data - defaulting to Open Challenge...")
+                print("Challenge will begin in 2 seconds...")
+                time.sleep(2)  # Give user time to see the message
+                app.run_open_challenge()
         else:
             print("\nNo button press detected. Showing menu...")
             print("Note: Use menu option 7 for Obstacle Challenge")
