@@ -302,7 +302,7 @@ The steering system consists of two symmetrical wheel mounts connected by a prec
 <table>
   <tr>
     <td width="50%" style="text-align: left;">
-      <img src="./t-photos/servo.jpg" alt="Servo Motor" width="100%">
+      <img src="./t-photos/servo.PNG" alt="Servo Motor" width="100%">
     </td>
     <td width="50%" style="text-align: left; vertical-align: top;">
       <h3>Specifications:</h3>
