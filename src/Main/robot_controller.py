@@ -1414,7 +1414,7 @@ class RobotController:
         
             
             current_lane = 1
-            number_laps = 10
+            number_laps = 3
 
             
             # Main obstacle challenge loop

@@ -22,8 +22,8 @@ This repository contains the comprehensive engineering documentation for the Sã
   * [Chassis](#chassis)
 * [Power and Sense Management](#power-and-sense-management)
   * [Battery](#battery)
-  * [Raspberry Pi 5](#raspberry-pi-5)
-  * [Raspberry Pi Pico](#raspberry-pi-pico)
+  * [Raspberry Pi Zero](#raspberry-pi-zero)
+  * [Raspberry Pi Pico (x2)](#raspberry-pi-pico)
   * [Camera Module](#camera-module)
   * [Sonar Sensors](#sonar-sensors)
   * [Compass Module](#compass-module)
@@ -366,7 +366,7 @@ The chassis is organized into four distinct levels:
 
 1. **Lower Level:** Houses the rear differential, drive motor, and power transmission components
 2. **Battery Level:** Dedicated space for power systems with integrated protection and easy access
-3. **Control Level:** Raspberry Pi 5, Raspberry Pi Pico, and associated control electronics
+3. **Control Level:** Raspberry Pi Zero, two Raspberry Pi Picos, and associated control electronics
 4. **Sensor Tower:** Elevated platform for compass and camera to minimize electromagnetic interference
 
 **Specialized Features:**
@@ -425,7 +425,7 @@ The battery is secured in a dedicated compartment on the chassis's second level,
 
 **Power Distribution:**
 - 12V rail: Drive motor and high-power actuators
-- 5V rail: Raspberry Pi 5 and servo motor
+- 5V rail: Raspberry Pi Zero and servo motor
 - 3.3V rail: Sensors and digital logic
 
 Where to buy the battery: [Battery specialists](https://www.batteryspace.com)
@@ -438,53 +438,47 @@ Where to buy the battery: [Battery specialists](https://www.batteryspace.com)
 - Upgrade to higher energy density cells for extended runtime
 - Integrate power usage analytics for optimization
 
-## Raspberry Pi 5 <a class="anchor" id="raspberry-pi-5"></a>
+## Raspberry Pi Zero <a class="anchor" id="raspberry-pi-zero"></a>
 
 <table>
   <tr>
     <td width="50%" style="text-align: left;">
-      <img src="./v-photos/rpi5-placeholder.jpg" alt="Raspberry Pi 5" width="100%">
+      <img src="./v-photos/rpi5-placeholder.jpg" alt="Raspberry Pi Zero" width="100%">
     </td>
     <td width="50%" style="text-align: left; vertical-align: top;">
-      <h3>Specifications:</h3>
-      <li>CPU: Quad-core ARM Cortex-A76 @ 2.4GHz</li>
-      <li>GPU: VideoCore VII</li>
-      <li>RAM: 8GB LPDDR4X</li>
-      <li>Storage: 64GB microSD + 32GB eMMC</li>
-      <li>Connectivity: WiFi 6, Bluetooth 5.0</li>
-      <li>I/O: 40-pin GPIO, 2x USB 3.0, 2x USB 2.0</li>
+      <h3>Overview:</h3>
+      <li>Compact Linux computer for coordination and supervision</li>
+      <li>CSI camera interface and 40-pin GPIO header</li>
+      <li>Wireless connectivity (model dependent)</li>
+      <li>microSD-based storage</li>
     </td>
   </tr>
 </table>
 
-The Raspberry Pi 5 serves as our primary computing platform, handling computer vision processing, high-level navigation algorithms, and wireless communication. Its substantial computational power enables real-time image processing and complex decision-making algorithms.
+The Raspberry Pi Zero serves as the coordination computer, handling high-level logic, lightweight image capture/processing when needed, inter-module communication, telemetry, and data logging. Real-time control and timing-critical tasks are delegated to the two Raspberry Pi Picos.
 
 **Primary Responsibilities:**
-- Computer vision and image processing
-- High-level navigation and path planning
-- Obstacle detection and classification
+- High-level navigation coordination and state management
 - Wireless communication and telemetry
+- Camera capture and lightweight vision tasks (where applicable)
 - Data logging and performance analysis
 
 **Software Stack:**
-- Operating System: Raspberry Pi OS (64-bit)
-- Computer Vision: OpenCV 4.8 with hardware acceleration
-- Machine Learning: TensorFlow Lite for inference
+- Operating System: Raspberry Pi OS
+- Computer Vision: OpenCV (lightweight usage as needed)
 - Communication: Custom protocols over I2C and UART
 
-**Performance Optimizations:**
-- GPU acceleration for image processing operations
-- Multi-threading for parallel sensor data processing
-- Optimized memory management for real-time operations
-- Custom kernel modules for low-latency sensor interfaces
+**Performance Considerations:**
+- Efficient data pipelines to offload timing-critical work to Picos
+- Multi-threading for sensor I/O and communications
+- Optimized memory and CPU usage for reliability
 
 Where to buy: [Official Raspberry Pi Foundation](https://www.raspberrypi.org/)
 
 <br>
 
 **Potential Improvements:**
-- Implement edge AI acceleration with specialized hardware
-- Add high-speed storage for advanced data logging
+- Add hardware accelerators for heavier vision workloads if needed
 - Integrate redundant processing capabilities for fault tolerance
 - Develop custom PCB integration for reduced form factor
 
@@ -496,7 +490,7 @@ Where to buy: [Official Raspberry Pi Foundation](https://www.raspberrypi.org/)
       <img src="./v-photos/pico-placeholder.jpg" alt="Raspberry Pi Pico" width="100%">
     </td>
     <td width="50%" style="text-align: left; vertical-align: top;">
-      <h3>Specifications:</h3>
+      <h3>Specifications (per board):</h3>
       <li>MCU: RP2040 dual-core ARM Cortex-M0+ @ 133MHz</li>
       <li>Memory: 264KB SRAM, 2MB Flash</li>
       <li>I/O: 26 GPIO pins, 3 ADC channels</li>
@@ -507,14 +501,14 @@ Where to buy: [Official Raspberry Pi Foundation](https://www.raspberrypi.org/)
   </tr>
 </table>
 
-The Raspberry Pi Pico handles real-time control tasks, sensor interfacing, and low-level motor control with microsecond precision. Its dual-core architecture allows separation of critical timing functions from communication tasks.
+We use two Raspberry Pi Pico boards. They handle real-time control tasks, sensor interfacing, and low-level motor control with microsecond precision. Their dual-core architecture allows separation of critical timing functions from communication tasks.
 
 **Primary Responsibilities:**
 - Real-time motor control and PWM generation
 - Sensor data acquisition and preprocessing
 - Hardware interfacing for actuators and sensors
 - Safety monitoring and emergency stop functions
-- Inter-processor communication with Raspberry Pi 5
+- Inter-processor communication with Raspberry Pi Zero
 
 **Real-Time Capabilities:**
 - Hardware-based PWM generation for smooth motor control
@@ -524,7 +518,7 @@ The Raspberry Pi Pico handles real-time control tasks, sensor interfacing, and l
 
 **Interface Management:**
 - I2C: Compass module and additional sensors
-- UART: Communication with Raspberry Pi 5
+- UART: Communication with Raspberry Pi Zero
 - PWM: Motor control and servo positioning
 - GPIO: Ultrasonic sensors and digital I/O
 
@@ -935,7 +929,7 @@ Our total project cost of €561.95 represents excellent value for a competitive
 
 # Software Architecture <a class="anchor" id="software-architecture"></a>
 
-Our software system is designed using a modular, multi-threaded architecture that enables real-time processing of sensor data, intelligent decision-making, and precise robot control. The system is implemented primarily in Python, leveraging the computational power of the Raspberry Pi 5 while ensuring microsecond-precision timing through the Raspberry Pi Pico.
+Our software system is designed using a modular, multi-threaded architecture that enables real-time processing of sensor data, intelligent decision-making, and precise robot control. The system is implemented primarily in Python, with a Raspberry Pi Zero coordinating high-level logic while the two Raspberry Pi Picos ensure microsecond-precision timing for real-time control.
 
 ## System Overview
 
@@ -1471,7 +1465,7 @@ Support: Required for overhangs >45°
 ### PCB Construction
 1. **Main Control Board:**
    ```
-   Components: Raspberry Pi 5, voltage regulators, connectors
+   Components: Raspberry Pi Zero, voltage regulators, connectors
    Size: 100mm x 80mm prototype board
    Connections: Follow circuit diagram (Section 7.1)
    ```
@@ -1667,12 +1661,12 @@ This construction guide ensures reliable reproduction of our robot design while 
 
 **Main Power Distribution:**
 - Primary: 11.1V Li-Po Battery (3S configuration)
-- Secondary: 5V regulated for Raspberry Pi 5 and servo motor
+- Secondary: 5V regulated for Raspberry Pi Zero and servo motor
 - Logic: 3.3V regulated for sensors and digital logic
 
 **Communication Interfaces:**
 - I2C Bus: Compass module (CMPS12)
-- UART: Inter-processor communication (Pi 5 ↔ Pi Pico)
+- UART: Inter-processor communication (Pi Zero ↔ Picos)
 - CSI-2: Camera module interface
 - GPIO: Ultrasonic sensors and motor control
 
