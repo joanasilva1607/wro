@@ -346,7 +346,8 @@ class RobotController:
         return True
         
     def move_lane(self, target_cm=None, relative=True, clockwise=True, wall_distance=50,
-                  use_sonar=False, use_compass=False, until_front_distance=None, blind_distance=0):
+                  use_sonar=False, use_compass=False, until_front_distance=None, blind_distance=0,
+                  lock_compass_heading=False):
         """
         Move along a lane with wall following and compass guidance.
         
@@ -361,6 +362,7 @@ class RobotController:
             compass_multiplier: Weight for compass correction
             until_front_distance: Stop when front sonar distance reaches this value (use either this OR target_cm, not both)
             blind_distance: Distance to travel before checking front obstacle
+            lock_compass_heading: If True and use_compass, lock current heading as target
         """
         if not self._is_initialized:
             return False
@@ -375,6 +377,16 @@ class RobotController:
         sonar_multiplier=0.25 / ( wall_distance / 25)
 
             
+        # Optionally lock current heading as compass target
+        previous_compass_offset = None
+        did_lock_heading = False
+        if use_compass and lock_compass_heading:
+            current_heading_for_lock = self._compass_hal.get_heading()
+            if current_heading_for_lock is not None:
+                previous_compass_offset = self._compass_hal.get_angle_offset()
+                self._compass_hal.set_angle_offset(current_heading_for_lock + 180)
+                did_lock_heading = True
+
         # Determine movement mode
         use_distance_mode = target_cm is not None
         use_front_distance_mode = until_front_distance is not None
@@ -535,6 +547,10 @@ class RobotController:
             prev_speed = speed
             time.sleep(1/100)
             
+        # Restore compass offset if we locked it for this movement
+        if did_lock_heading and previous_compass_offset is not None:
+            self._compass_hal.set_angle_offset(previous_compass_offset)
+
         self.stop()
         return True
         
@@ -1507,12 +1523,13 @@ class RobotController:
                             rear_distance = sensor_data.get('rear', 255)
 
                     else:
-                        sensor_data = self._get_sensor_data()
-                        front_distance = sensor_data.get('front', 255)
-                        while front_distance > 20:
-                            time.sleep(0.001)
-                            sensor_data = self._get_sensor_data()
-                            front_distance = sensor_data.get('front', 255)
+                        self.move_lane(
+                            relative=True,
+                            clockwise=clockwise,
+                            use_compass=True,
+                            lock_compass_heading=True,
+                            until_front_distance=20
+                        )
                             
                     self.rotate_angle(0, relative=False)
                 else:
