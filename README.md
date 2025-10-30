@@ -185,7 +185,7 @@ Our transmission system combines a custom gearbox with precisely engineered 3D-p
 <table>
   <tr>
     <td width="50%" style="text-align: left;">
-      <img src="./v-photos/motor-placeholder.jpg" alt="Drive Motor" width="100%">
+      <img src="./v-photos/motor.jpg" alt="Drive Motor" width="100%">
     </td>
     <td width="50%" style="text-align: left; vertical-align: top;">
       <h3>Specifications:</h3>
@@ -302,7 +302,7 @@ The steering system consists of two symmetrical wheel mounts connected by a prec
 <table>
   <tr>
     <td width="50%" style="text-align: left;">
-      <img src="./v-photos/servo-placeholder.jpg" alt="Servo Motor" width="100%">
+      <img src="./v-photos/servo.jpg" alt="Servo Motor" width="100%">
     </td>
     <td width="50%" style="text-align: left; vertical-align: top;">
       <h3>Specifications:</h3>
