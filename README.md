@@ -532,7 +532,7 @@ Where to buy: [Official Raspberry Pi Foundation](https://www.raspberrypi.org/)
 - Integrate hardware security features for competition validation
 - Develop custom firmware for specialized competition requirements
 
-## Camera Module <a class="anchor" id="camera-module"></a>
+## Camera Module (Raspberry Pi Camera Module 3 Wide) <a class="anchor" id="camera-module"></a>
 
 <table>
   <tr>
@@ -541,17 +541,18 @@ Where to buy: [Official Raspberry Pi Foundation](https://www.raspberrypi.org/)
     </td>
     <td width="50%" style="text-align: left; vertical-align: top;">
       <h3>Specifications:</h3>
+      <li>Model: Raspberry Pi Camera Module 3 Wide</li>
       <li>Sensor: Sony IMX708 (12MP)</li>
       <li>Resolution: 4608×2592 (still), 1920×1080 (video)</li>
       <li>Frame Rate: 60fps @ 1080p, 30fps @ 4K</li>
-      <li>Field of View: 75° diagonal</li>
+      <li>Field of View: ~120° diagonal (wide)</li>
       <li>Interface: CSI-2 (4-lane)</li>
       <li>Features: Autofocus, HDR</li>
     </td>
   </tr>
 </table>
 
-Our computer vision system centers around the Raspberry Pi Camera Module 3, providing high-resolution imaging with advanced features essential for obstacle detection and navigation in the WRO challenge environment.
+Our computer vision system centers around the Raspberry Pi Camera Module 3 Wide, providing a wide field of view and high-resolution imaging essential for obstacle detection and navigation in the WRO challenge environment.
 
 **Vision Processing Capabilities:**
 - Real-time obstacle detection and classification
@@ -703,7 +704,7 @@ Our cost analysis provides transparency in project expenditures and demonstrates
       <td><strong>Sensors & Vision</strong></td><td></td><td></td><td></td>
     </tr>
     <tr>
-      <td>Camera Module 3 (12MP)</td> <td>1</td> <td>35.99</td> <td>35.99</td>
+      <td>Camera Module 3 Wide (12MP)</td> <td>1</td> <td>35.99</td> <td>35.99</td>
     </tr>
     <tr>
       <td>HC-SR04 Ultrasonic Sensors</td> <td>4</td> <td>2.50</td> <td>10.00</td>
