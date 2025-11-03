@@ -185,7 +185,7 @@ Our transmission system combines a custom gearbox with precisely engineered 3D-p
 <table>
   <tr>
     <td width="50%" style="text-align: left;">
-      <img src="./t-photos/motor.jpg" alt="Drive Motor" width="100%">
+      <img src="./t-photos/Motor.jpg" alt="Drive Motor" width="100%">
     </td>
     <td width="50%" style="text-align: left; vertical-align: top;">
       <h3>Specifications:</h3>
@@ -487,7 +487,7 @@ Where to buy: [Official Raspberry Pi Foundation](https://www.raspberrypi.org/)
 <table>
   <tr>
     <td width="50%" style="text-align: left;">
-      <img src="./v-photos/pico-placeholder.jpg" alt="Raspberry Pi Pico" width="100%">
+      <img src="./t-photos/Raspberry_Pi_Pico.webp" alt="Raspberry Pi Pico" width="100%">
     </td>
     <td width="50%" style="text-align: left; vertical-align: top;">
       <h3>Specifications (per board):</h3>
@@ -537,7 +537,7 @@ Where to buy: [Official Raspberry Pi Foundation](https://www.raspberrypi.org/)
 <table>
   <tr>
     <td width="50%" style="text-align: left;">
-      <img src="./v-photos/camera-placeholder.jpg" alt="Camera Module" width="100%">
+      <img src="./t-photos/Camera.jpg" alt="Camera Module" width="100%">
     </td>
     <td width="50%" style="text-align: left; vertical-align: top;">
       <h3>Specifications:</h3>
