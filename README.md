@@ -633,7 +633,7 @@ Where to buy: [Electronic component suppliers](https://www.adafruit.com)
 <table>
   <tr>
     <td width="50%" style="text-align: left;">
-      <img src="./v-photos/compass-placeholder.jpg" alt="Compass Module" width="100%">
+      <img src="./t-photos/Compass.jfif" alt="Compass Module" width="100%">
     </td>
     <td width="50%" style="text-align: left; vertical-align: top;">
       <h3>Specifications:</h3>
