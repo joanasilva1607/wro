@@ -3040,18 +3040,13 @@ All 3D models are designed in Onshape (cloud-based CAD) and exported for 3D prin
   - Generic bearing mount for various locations
   - Press-fit design for secure bearing retention
 
-**Miscellaneous Parts:**
-- `part_11.stl` - Custom component #11
-- `part_12.stl` - Custom component #12
-- `part_37.stl` - Custom component #37
-- `part_38.stl` - Custom component #38
-- `part_39.stl` - Custom component #39
-  - Specialized components for specific assembly requirements
-  - Designed for unique integration needs
-
 **Access and Licensing:**
 - All 29 STL files available in `/models/` directory
 - Files are print-ready and tested
+- **Onshape CAD Project:** [View and edit the complete 3D design](https://cad.onshape.com/documents/e064973258882f3797ca66b3/w/e97523327652e311225f2991/e/db3f49a87a84e425faee13c2)
+  - Full parametric CAD models
+  - Assembly views with all components
+  - Edit and customize designs directly in your browser
 - Licensed under Creative Commons CC-BY-SA 4.0
 - Compatible with standard FDM 3D printers
 
