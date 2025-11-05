@@ -2934,50 +2934,126 @@ Our comprehensive testing methodology ensures reliable performance across all co
 
 ### 3D CAD Models and Manufacturing Files
 
-All 3D models are designed in Onshape (cloud-based CAD) and exported for 3D printing.
+All 3D models are designed in Onshape (cloud-based CAD) and exported for 3D printing. The `/models/` directory contains 29 STL files representing all custom-designed components of our robot.
 
-**Main Chassis Components:**
-- `chassis_main_v5.stl` - Main chassis structure (180g, 4-hour print)
-  - Integrated mounting points for all electronics
+![Robot 3D Render](./v-photos/robot_3d_render.png)
+*Complete 3D CAD render showing the assembled robot with all custom components*
+
+**Chassis and Structural Components:**
+- `base.stl` - Main chassis base structure
+  - Primary platform for all robot components
+  - Integrated mounting points for electronics and mechanical parts
   - Optimized rib structure for strength-to-weight ratio
-  - Cable management channels built-in
   
-- `sensor_tower_v3.stl` - Elevated sensor platform (25g, 2-hour print)
-  - 8cm height to minimize magnetic interference
-  - Vibration dampening mounts for compass
-  - Adjustable camera mounting bracket
-  
-- `motor_mount_v2.stl` - Drive motor housing (35g, 1-hour print)
-  - Vibration isolation features
-  - Quick-release mechanism
-  - Integrated cable routing
+- `raspberry_base.stl` - Raspberry Pi mounting platform
+  - Secure mounting for Raspberry Pi Zero controller
+  - Heat dissipation features
+  - Cable management channels
 
-- `servo_mount_v4.stl` - Steering servo bracket (20g, 1-hour print)
-  - Rigid attachment for precise steering
+- `brace.stl` - Structural reinforcement brace
+  - Provides additional rigidity to chassis
+  - Stress distribution optimization
+
+**Drivetrain Components:**
+- `motor_gear.stl` - Motor drive gear
+  - Custom-designed gear ratio for optimal torque/speed balance
+  - Precision teeth profile for smooth operation
+  
+- `motor_gear_bearing.stl` - Motor gear bearing housing
+  - Ensures proper gear alignment
+  - Reduces friction and wear
+
+- `housing.stl` - Main drivetrain housing
+  - Protects internal drivetrain components
+  - Dust and debris protection
+  
+- `housing_gear.stl` - Gear housing assembly
+  - Integrated gear mounting system
+  - Maintains precise gear meshing
+
+**Differential System:**
+- `diff_box_top.stl` - Differential box top cover
+  - Encloses differential mechanism
+  - Easy access for maintenance
+  
+- `diff_support.stl` - Differential support structure
+  - Provides stable mounting for differential
+  - Load distribution optimization
+  
+- `diff_bearing.stl` - Differential bearing housing
+  - Precision bearing mounts
+  - Reduces drivetrain friction
+
+**Wheel and Axle System:**
+- `wheel.stl` - Custom wheel design
+  - Optimized for 3D printing with appropriate flexibility
+  - Tire mounting interface
+  
+- `axle_hub.stl` - Axle hub connector
+  - Connects wheels to axle
+  - Bearing integration for smooth rotation
+  
+- `front_bearing.stl` - Front axle bearing housing
+  - Supports front wheel assembly
+  - Precision bearing press-fit design
+
+- `terminal_1.stl` - Front wheel terminal mount
+- `terminal_2.stl` - Rear wheel terminal mount
+- `terminal_bearing.stl` - Terminal bearing housing
+  - Complete wheel mounting system
+  - Ensures proper wheel alignment
+
+**Steering System:**
+- `servo_mg90s.stl` - MG90S servo mounting bracket
+  - Custom-fitted for MG90S servo motor
+  - Rigid attachment for precise steering control
   - Protected servo horn connection
-  - Strain relief for servo cable
+  
+- `servo_support.stl` - Primary servo support structure
+  - Main structural support for steering servo
+  - Vibration dampening features
+  
+- `servo_support_alt.stl` - Alternative servo support
+  - Alternate mounting configuration
+  - Provides design flexibility
 
-- `wheel_hub_v2.stl` (4x) - Wheel adapters (8g each, 30-min print each)
-  - 6mm bore for steel axles
-  - Bearing press-fit design
-  - Tire retention features
+- `steering_bar.stl` - Steering linkage bar
+  - Connects servo to steering pivot
+  - Precise length for optimal steering geometry
+  
+- `steering_pivot_front.stl` - Front steering pivot
+  - Kingpin assembly for front steering
+  - Low-friction pivot design
 
-- `battery_compartment_v3.stl` - Power system housing (40g, 1.5-hour print)
-  - Shock absorption features
-  - Quick-access lid
-  - Ventilation for heat dissipation
+- `arm.stl` - Steering arm linkage
+  - Transfers servo motion to wheels
+  - Optimized steering angle range
 
-**Mechanical Parts:**
-- `differential_housing.stl` - Custom differential assembly
-- `gear_40t.stl` - 40-tooth drive gear
-- `gear_20t.stl` - 20-tooth pinion gear
-- `axle_bracket.stl` - Rear axle support
+**Sensor Mounts:**
+- `sonar_base.stl` - Ultrasonic sensor mounting platform
+  - Elevated platform for optimal sensor positioning
+  - Multiple sensor mounting points
+  - Vibration isolation features
+
+**Bearing Components:**
+- `bearing.stl` - Standard bearing housing
+  - Generic bearing mount for various locations
+  - Press-fit design for secure bearing retention
+
+**Miscellaneous Parts:**
+- `part_11.stl` - Custom component #11
+- `part_12.stl` - Custom component #12
+- `part_37.stl` - Custom component #37
+- `part_38.stl` - Custom component #38
+- `part_39.stl` - Custom component #39
+  - Specialized components for specific assembly requirements
+  - Designed for unique integration needs
 
 **Access and Licensing:**
-- All STL files available in `/models/` directory
-- STEP files available for CAD software compatibility
+- All 29 STL files available in `/models/` directory
+- Files are print-ready and tested
 - Licensed under Creative Commons CC-BY-SA 4.0
-- Print settings and material recommendations included in `/models/README.md`
+- Compatible with standard FDM 3D printers
 
 **Print Settings Recommendations:**
 ```
