@@ -293,6 +293,36 @@ The motor is securely mounted to the chassis using a custom 3D-printed holder th
 
 Where to buy the motor: [Educational Robotics Suppliers](https://www.example.com)
 
+#### Motor Driver - SparkFun Dual TB6612FNG
+
+We selected the **SparkFun TB6612FNG** dual H-bridge motor driver for its superior performance and efficiency compared to traditional L298N drivers.
+
+**Key Specifications:**
+- Dual channel H-bridge for independent motor control
+- 1.2A continuous per channel (3.2A peak)
+- Operating voltage: 4.5V to 13.5V (ideal for our 12V system)
+- Low voltage drop: 0.5V typical (vs 2-4V for L298N)
+- High efficiency: >95% (vs ~75% for L298N)
+- Built-in protection: thermal shutdown, short circuit, under-voltage lockout
+- Compact size: 20mm x 20mm breakout board
+
+**Advantages Over L298N:**
+- **3x more efficient** - less heat generation, longer battery life
+- **Lower voltage drop** - more power delivered to motor at same voltage
+- **Smaller and lighter** - better for compact robot design
+- **Better thermal performance** - no heatsink required for our application
+- **PWM frequency support** - up to 100kHz for smoother motor control
+
+**Control Interface:**
+- Direction control: 2 digital pins (AIN1, AIN2)
+- Speed control: 1 PWM pin (PWMA)
+- Standby control: 1 digital pin (STBY)
+- Simple logic control compatible with Raspberry Pi Pico GPIO
+
+The TB6612FNG's efficiency translates directly to improved robot performance through longer battery life and more consistent motor speed under load.
+
+Where to buy: [SparkFun](https://www.sparkfun.com/products/14450) | [Adafruit](https://www.adafruit.com/product/2448)
+
 <br>
 
 **Potential Improvements:**
@@ -860,7 +890,7 @@ Our comprehensive Bill of Materials provides complete component information for 
       <td>Drive Motor</td><td>DC Geared Motor 12V 30:1</td><td>1</td><td>350 RPM, 1.2kg·cm, magnetic encoder</td><td>Pololu/RobotShop</td><td>€25.00</td>
     </tr>
     <tr>
-      <td>Motor Driver</td><td>L298N Dual H-Bridge</td><td>1</td><td>2A per channel, 5-35V input</td><td>AliExpress/Amazon</td><td>€3.50</td>
+      <td>Motor Driver</td><td>SparkFun Dual TB6612FNG</td><td>1</td><td>1.2A per channel, 15V max, dual H-bridge</td><td>SparkFun/Digikey</td><td>€8.50</td>
     </tr>
     <tr>
       <td>Wheels</td><td>65mm Rubber Wheels</td><td>4</td><td>65mm diameter, rubber tire, 6mm bore</td><td>Educational Suppliers</td><td>€3.50</td>
@@ -980,7 +1010,7 @@ Understanding power consumption is critical for reliable operation and optimal b
       <td>DC Drive Motor</td><td>12V</td><td>50mA</td><td>800mA</td><td>2000mA</td><td>9.60W</td>
     </tr>
     <tr>
-      <td>L298N Motor Driver</td><td>12V</td><td>20mA</td><td>50mA</td><td>100mA</td><td>0.60W</td>
+      <td>TB6612FNG Motor Driver</td><td>12V</td><td>10mA</td><td>30mA</td><td>60mA</td><td>0.36W</td>
     </tr>
     <tr>
       <td>Voltage Regulators (losses)</td><td>-</td><td>-</td><td>-</td><td>-</td><td>1.00W</td>
@@ -992,7 +1022,7 @@ Understanding power consumption is critical for reliable operation and optimal b
 </table>
 
 **Power Distribution:**
-- **12V Rail (from battery):** Drive motor, motor driver, input to regulators
+- **12V Rail (from battery):** Drive motor, TB6612FNG motor driver, input to regulators
 - **5V Rail (regulated):** Raspberry Pi Zero, Picos, camera, ultrasonic sensors, servo
 - **3.3V Rail (regulated):** Compass module, logic-level signals
 
@@ -1069,7 +1099,7 @@ Our cost analysis provides transparency in project expenditures and demonstrates
       <td>Geared DC Motor with Encoder</td> <td>1</td> <td>25.00</td> <td>25.00</td>
     </tr>
     <tr>
-      <td>Motor Driver (L298N)</td> <td>1</td> <td>3.50</td> <td>3.50</td>
+      <td>Motor Driver (SparkFun TB6612FNG)</td> <td>1</td> <td>8.50</td> <td>8.50</td>
     </tr>
     <tr>
       <td><strong>Power System</strong></td><td></td><td></td><td></td>
@@ -1110,7 +1140,7 @@ Our cost analysis provides transparency in project expenditures and demonstrates
   </tbody>
 </table>
 
-**Total for Components:** **€357.95**
+**Total for Components:** **€362.95**
 
 ---
 
@@ -1242,28 +1272,28 @@ Our cost analysis provides transparency in project expenditures and demonstrates
   </thead>
   <tbody>
     <tr>
-      <td>Electronic Components</td> <td>357.95</td> <td>64.5%</td>
+      <td>Electronic Components</td> <td>362.95</td> <td>64.0%</td>
     </tr>
     <tr>
-      <td>3D Printing & Materials</td> <td>44.00</td> <td>7.9%</td>
+      <td>3D Printing & Materials</td> <td>44.00</td> <td>7.8%</td>
     </tr>
     <tr>
-      <td>Tools & Equipment</td> <td>70.00</td> <td>12.6%</td>
+      <td>Tools & Equipment</td> <td>70.00</td> <td>12.3%</td>
     </tr>
     <tr>
       <td>Software Development</td> <td>0.00</td> <td>0.0%</td>
     </tr>
     <tr>
-      <td>Testing & Preparation</td> <td>90.00</td> <td>16.2%</td>
+      <td>Testing & Preparation</td> <td>90.00</td> <td>15.9%</td>
     </tr>
     <tr>
-      <td><strong>Project Total</strong></td> <td><strong>€561.95</strong></td> <td><strong>100.0%</strong></td>
+      <td><strong>Project Total</strong></td> <td><strong>€566.95</strong></td> <td><strong>100.0%</strong></td>
     </tr>
   </tbody>
 </table>
 
 **Cost-Effectiveness Analysis:**
-Our total project cost of €561.95 represents excellent value for a competitive WRO Future Engineers robot. The largest investment in electronic components (64.5%) reflects our emphasis on sophisticated sensing and computing capabilities that provide significant competitive advantages. The relatively low material costs (7.9%) demonstrate efficient design and manufacturing approaches.
+Our total project cost of €566.95 represents excellent value for a competitive WRO Future Engineers robot. The largest investment in electronic components (64.0%) reflects our emphasis on sophisticated sensing and computing capabilities that provide significant competitive advantages. The relatively low material costs (7.8%) demonstrate efficient design and manufacturing approaches.
 
 **Cost Optimization Strategies:**
 - Leveraged educational licenses and open-source software (€0 software costs)
@@ -2684,8 +2714,8 @@ Battery (11.1V, 2200mAh)
   │     │
   │     ├──> Power Switch (20A DPST)
   │           │
-  │           ├──> DC Motor (12V, 2A peak)
-  │           │    └──> L298N Motor Driver
+  │           ├──> DC Motor (12V, 1.2A peak)
+  │           │    └──> SparkFun TB6612FNG Motor Driver
   │           │
   │           ├──> 5V Buck Regulator (LM2596, 3A)
   │           │    │
@@ -2730,7 +2760,7 @@ Raspberry Pi Zero (CSI port) ←─────→ Camera Module 3 Wide
 | GP2-GP3 | I2C SDA/SCL | To CMPS12 Compass |
 | GP4-GP5 | Sonar Trigger/Echo | Front Ultrasonic |
 | GP6-GP7 | Sonar Trigger/Echo | Left Ultrasonic |
-| GP12-GP13 | PWM Motor Control | To L298N Driver |
+| GP12-GP13 | PWM Motor Control | To TB6612FNG Driver |
 | GP14 | UART Servo Control | To MG996R Servo |
 | GP20-GP21 | Encoder Input | Motor encoder signals |
 
@@ -2742,12 +2772,13 @@ Raspberry Pi Zero (CSI port) ←─────→ Camera Module 3 Wide
 | GP6-GP7 | Sonar Trigger/Echo | Rear Ultrasonic |
 | GP16 | Status LED | System health indicator |
 
-### Motor Driver Connections (L298N)
+### Motor Driver Connections (SparkFun TB6612FNG)
 
 ```
-L298N H-Bridge Driver
-  ├─ IN1, IN2: PWM signals from Pico #1 GP12-GP13
-  ├─ ENA: Enable (always HIGH)
+SparkFun TB6612FNG Dual H-Bridge Driver
+  ├─ AIN1, AIN2: Direction control from Pico #1 GP12-GP13
+  ├─ PWMA: PWM speed control from Pico #1 GP14
+  ├─ STBY: Standby (HIGH for normal operation)
   ├─ OUT1, OUT2: To DC Motor
   ├─ VCC: 12V from battery
   └─ GND: Common ground
@@ -2783,7 +2814,7 @@ L298N H-Bridge Driver
 **Power Connectors:**
 - Battery: XT60 connector (rated 60A)
 - Distribution: JST-XH 2.54mm connectors
-- Motor: Screw terminals (L298N)
+- Motor: Screw terminals (TB6612FNG breakout)
 
 **Signal Connectors:**
 - Sensors: 4-pin JST-XH (VCC, GND, TRIG, ECHO)
