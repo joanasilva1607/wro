@@ -51,7 +51,7 @@ class RobotConfig:
             }
         },
         "navigation": {
-            "default_max_speed": 0.65,
+            "default_max_speed": 0.70,
             "default_min_speed": 0.25,
             "default_slow_distance": 20,
             "default_stop_distance": 5,

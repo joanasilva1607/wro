@@ -278,10 +278,10 @@ class RobotController:
             self._compass_hal.set_angle_offset(current_offset + angle)
             
         # Rotation parameters
-        max_offset = 50
-        margin = 1
-        angle_min_adjustment = 3
-        speed_min = 0.22
+        max_offset = 45
+        margin = 0.75
+        angle_min_adjustment = 2.5
+        speed_min = 0.2
         speed_max = 0.4
         
         start_time = time.time()
@@ -292,6 +292,7 @@ class RobotController:
             if timeout and (time.time() - start_time) > timeout:
                 self.stop()
                 self._servo_hal.move_to_center()
+                time.sleep(0.2)
                 return False
                 
             current_bearing = self._compass_hal.get_relative_heading()
@@ -302,6 +303,7 @@ class RobotController:
             if abs(current_bearing - 180) <= margin:
                 self.stop()
                 self._servo_hal.move_to_center()
+                time.sleep(0.2)
                 break
                 
             # Calculate steering adjustment
@@ -322,7 +324,7 @@ class RobotController:
                 angle_adjustment = -angle_adjustment
                 
             # Set steering angle
-            servo_angle = int(self._servo_hal.center_steering - angle_adjustment)
+            servo_angle = self._servo_hal.center_steering - angle_adjustment
             self.steer(servo_angle)
             
             # Wait for servo on first loop
@@ -340,14 +342,14 @@ class RobotController:
             else:
                 self.move_forward(speed)
                 
-            time.sleep(0.0002)  # Control loop delay
+            time.sleep(1/500)  # Control loop delay
         
         self._compass_hal.set_angle_offset(offeset_bak)
         return True
         
     def move_lane(self, target_cm=None, relative=True, clockwise=True, wall_distance=50,
                   use_sonar=False, use_compass=False, until_front_distance=None, blind_distance=0,
-                  lock_compass_heading=False, until_rear_distance=None):
+                  lock_compass_heading=False, until_rear_distance=None,compass_multiplier=0.1):
         """
         Move along a lane with wall following and compass guidance.
         
@@ -373,7 +375,6 @@ class RobotController:
         if specified_modes != 1:
             raise ValueError("Specify exactly one of target_cm, until_front_distance, or until_rear_distance.")
 
-        compass_multiplier=0.1
         sonar_multiplier=0.25
 
         if wall_distance > 50:
@@ -501,7 +502,7 @@ class RobotController:
                     side_distance = sensor_data.get('right', wall_distance)  # Outside wall is on the right
                     diff_distance = (side_distance - wall_distance)  # Invert for right wall following
                 
-                if abs(diff_distance) > 20:
+                if abs(diff_distance) > 10:
                     diff_distance = 0
                     
             diff_compass = 0
@@ -545,8 +546,10 @@ class RobotController:
                 
             # Adjust steering based on speed
             servo_angle = servo_angle / speed * max_speed
-            print("Servo angle: ", servo_angle)
-            print("Center: ", self._servo_hal.center_steering)
+
+            if reverse:
+                servo_angle = -servo_angle
+                
             servo_angle = self._servo_hal.center_steering + servo_angle
 
 
@@ -556,12 +559,14 @@ class RobotController:
             # Apply movement and steering
             if reverse:
                 self.move_backward(speed)
-                self.steer(-servo_angle)
             else:
                 self.move_forward(speed)
-                self.steer(servo_angle)
+
+            
+            self.steer(servo_angle)
                 
             prev_speed = speed
+
             time.sleep(1/100)
             
         # Restore compass offset if we locked it for this movement
@@ -1281,7 +1286,6 @@ class RobotController:
                 )
             
             self.rotate_angle(0, relative=False)
-            time.sleep(0.2)
             
             # Simulate color detection (hardcoded for now)
             # In future implementation, this would use actual camera data
@@ -1329,8 +1333,6 @@ class RobotController:
                 self.rotate_angle(0, relative=False, reverse=True)
             else:
                 self.rotate_angle(0, relative=False, reverse=False)
-                
-            time.sleep(0.2)
 
             return next_lane
             
@@ -1404,7 +1406,6 @@ class RobotController:
                 until_rear_distance=4
             )
             self.rotate_angle(50 if clockwise else -50)
-            time.sleep(0.2)
             
             # Check initial lane alignment
             previous_lane_alignment = False
@@ -1452,7 +1453,7 @@ class RobotController:
                 wall_distance=wall_distance,
                 use_sonar=True,
                 use_compass=True,
-                until_front_distance=25,
+                until_front_distance=15,
                 blind_distance=50
             )
             
@@ -1522,7 +1523,6 @@ class RobotController:
                         angle = -angle
                         
                     self.rotate_angle(angle, relative=False)
-                    time.sleep(0.5)
                     
                     # Simulate final position detection
                     if color_inside["detected"] and color_outside["detected"]:
@@ -1571,16 +1571,22 @@ class RobotController:
                 
                 target_distance = 50
                 if current_lane == (number_laps*4)-1:
-                    target_distance = 18
+                    #Last lane of the last lap
+                    target_distance = 15
                 elif hardcoded_lanes[next_lane_index].initial == LaneTraffic.Unknown:
+                    #First lap
                     target_distance = 50
                 elif hardcoded_lanes[next_lane_index].initial == LaneTraffic.Inside:
+                    #Next is an Inside lane
                     target_distance = 63
                 else:
+
                     if next_lane_index == 0:
+                        #Next is an Outside lane and first lane
                         target_distance = 38
                     else:
-                        target_distance = 25
+                        #Next is an Outside lane and not first lane
+                        target_distance = 15
 
                 # Move to next corner
                 print("Moving to next corner...")
@@ -1621,7 +1627,7 @@ class RobotController:
                     clockwise=clockwise,
                     use_compass=True,
                     lock_compass_heading=True,
-                    until_rear_distance=20
+                    until_rear_distance=14
                 )
                 self.rotate_angle(0, reverse=True, relative=False)
 
@@ -1643,21 +1649,18 @@ class RobotController:
                 clockwise=clockwise,
                 use_compass=True,
                 lock_compass_heading=True,
-                until_rear_distance=20
+                until_rear_distance=28
             )
 
             self.rotate_angle(0, relative=False)
-            time.sleep(2)
-            
-            self.rotate_angle(0, relative=False)
-            time.sleep(0.2)
 
             self.move_lane(
                 relative=True,
                 clockwise=clockwise,
                 use_compass=True,
                 lock_compass_heading=True,
-                target_cm=25.5
+                target_cm=31.5,
+                compass_multiplier=0.65
             )
 
             self.rotate_angle(90 if clockwise else -90, reverse=True)
@@ -1666,13 +1669,12 @@ class RobotController:
             self.move_lane(
                 relative=True,
                 clockwise=clockwise,
-                until_rear_distance=13,
+                until_rear_distance=18,
                 use_compass=True,
                 lock_compass_heading=True
             )
 
             self.rotate_angle(0, reverse=True, relative=False)
-            time.sleep(0.1)
 
 
             self.move_lane(
