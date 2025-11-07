@@ -275,7 +275,7 @@ The motor is securely mounted to the chassis using a custom 3D-printed holder th
 - Integrated cable management for clean wiring
 - Thermal management considerations for extended operation
 
-Where to buy the motor: [Educational Robotics Suppliers](https://www.example.com)
+Where to buy the motor(https://www.pololu.com/product/3039)
 
 #### Motor Driver - SparkFun Dual TB6612FNG
 
