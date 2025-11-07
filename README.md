@@ -8,22 +8,6 @@ This repository contains the comprehensive engineering documentation for the Sã
 
 ---
 
-## 📋 Engineering Journal Rubric Compliance
-
-This documentation is structured to achieve maximum scoring across all WRO evaluation criteria:
-
-| **Scoring Area** | **Maximum Points** | **Documentation Location** | **Status** |
-|------------------|-------------------|---------------------------|------------|
-| **1. Mobility Management** | 4 | [Mobility Management](#mobility-management) section with motor selection, chassis design, assembly instructions, CAD files | ✅ **Exceeds Expectations** |
-| **2. Power and Sense Management** | 4 | [Power and Sense Management](#power-and-sense-management) with BOM, power consumption analysis, wiring diagrams | ✅ **Exceeds Expectations** |
-| **3. Obstacle Management** | 4 | [Obstacle Management](#obstacle-management) with flow diagrams, pseudo code, detailed source code | ✅ **Exceeds Expectations** |
-| **4. Pictures – Team and Vehicle** | 4 | [Team Photos](#team), [Robot Photos](#robot-overview) showing all angles and components | ✅ **Exceeds Expectations** |
-| **5. Performance Videos** | 4 | [Performance Videos](#video) demonstrating both challenges with commentary | ✅ **Exceeds Expectations** |
-| **6. GitHub Utilization** | 4 | Complete documentation, structured codebase, regular commits, open-source | ✅ **Exceeds Expectations** |
-| **7. Engineering Factor** | 4 | Custom-designed robot (60% original components), full CAD design, custom chassis | ✅ **Level 4 Achievement** |
-| **8. Overall Judge Impression** | 2 | Comprehensive documentation enabling exact duplication | ✅ **Excellent Communication** |
-| **TOTAL** | **30** | | **Target: 30/30** |
-
 ### Documentation Highlights
 
 ✨ **Complete Duplication Capability:** Every aspect of our robot can be exactly replicated using:
