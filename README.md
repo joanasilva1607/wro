@@ -8,11 +8,6 @@ This repository contains the comprehensive engineering documentation for the Sã
 
 ---
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
->>>>>>> bb5f13c17412af465e9b65801ad2efc1a452d239
 ### Documentation Highlights
 
 ✨ **Complete Duplication Capability:** Every aspect of our robot can be exactly replicated using:
