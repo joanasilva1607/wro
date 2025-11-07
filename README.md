@@ -157,13 +157,12 @@ Our comprehensive performance documentation includes videos demonstrating both c
 ### 🎥 [Complete Performance Video on YouTube](https://youtu.be/YTKn1OeHEFA)
 
 **Video Contents:**
-- **Open Challenge Demonstration:** Complete 3-lap run with precision parking (0:00 - 2:15)
+- **Open Challenge Demonstration:** Complete 3-lap run
   - Starting position detection and initialization
   - Wall-following navigation with compass-guided turns
   - Consistent lap times and smooth cornering
-  - Precision parallel parking maneuver
   
-- **Obstacle Challenge Demonstration:** Full challenge completion (2:16 - 5:30)
+- **Obstacle Challenge Demonstration:** 
   - Discovery phase with real-time obstacle detection
   - Color classification of red and green traffic signs
   - Memory-based high-speed navigation in subsequent laps
