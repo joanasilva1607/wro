@@ -154,13 +154,14 @@ Learn more about the challenge [here](https://wro-association.org/wp-content/upl
 
 Our comprehensive performance documentation includes videos demonstrating both competition challenges:
 
-### 🎥 [Complete Performance Video on YouTube](https://youtu.be/YTKn1OeHEFA)
+### 🎥 [Complete Performance Video of the Open Challenge](https://www.youtube.com/watch?v=2Fg9LUSsLME)
 
-**Video Contents:**
 - **Open Challenge Demonstration:** Complete 3-lap run
   - Starting position detection and initialization
   - Wall-following navigation with compass-guided turns
   - Consistent lap times and smooth cornering
+ 
+### 🎥 [Complete Performance Video of the Obstacle Challenge](https://www.youtube.com/watch?v=GmwXWIamCes)   
   
 - **Obstacle Challenge Demonstration:** 
   - Discovery phase with real-time obstacle detection
