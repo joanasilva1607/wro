@@ -8,6 +8,8 @@ This repository contains the comprehensive engineering documentation for the Sã
 
 ---
 
+<<<<<<< HEAD
+
 ### Documentation Highlights
 
 ✨ **Complete Duplication Capability:** Every aspect of our robot can be exactly replicated using:
@@ -140,13 +142,13 @@ Learn more about the challenge [here](https://wro-association.org/wp-content/upl
 
 ## Photos of our robot ARTEMIS (Autonomous Robotics Technology for Enhanced Mobility and Intelligent Systems) <a class="anchor" id="robot-overview"></a>
 
-| <img src="./v-photos/front.jpeg" width="90%" /> | <img src="./v-photos/back.jpeg" width="85%" /> | 
-| :--: | :--: | 
-| *Front* | *Back* |
-| <img src="./v-photos/Side1.jpeg" width="90%" /> | <img src="./v-photos/Side2.jpeg" width="85%" /> | 
-| *Left* | *Right* |
-| <img src="./v-photos/top.jpeg" width="90%" /> | <img src="./v-photos/down.jpeg" width="85%" /> | 
-| *Top* | *Bottom* |
+| <img src="./v-photos/front.jpeg" width="90%" /> | <img src="./v-photos/back.jpeg" width="85%" />  |
+| :---------------------------------------------: | :---------------------------------------------: |
+|                     *Front*                     |                     *Back*                      |
+| <img src="./v-photos/Side1.jpeg" width="90%" /> | <img src="./v-photos/Side2.jpeg" width="85%" /> |
+|                     *Left*                      |                     *Right*                     |
+|  <img src="./v-photos/top.jpeg" width="90%" />  | <img src="./v-photos/down.jpeg" width="85%" />  |
+|                      *Top*                      |                    *Bottom*                     |
 
 <br>
 
@@ -245,7 +247,7 @@ Our transmission system combines a custom gearbox with precisely engineered 3D-p
 <table>
   <tr>
     <td width="50%" style="text-align: left;">
-      <img src="./t-photos/Motor.jpg" alt="Drive Motor" width="100%">
+      <img src="other\other_images\Motor.jpg" alt="Drive Motor" width="100%">
     </td>
     <td width="50%" style="text-align: left; vertical-align: top;">
       <h3>Specifications:</h3>
@@ -392,7 +394,7 @@ The steering system consists of two symmetrical wheel mounts connected by a prec
 <table>
   <tr>
     <td width="50%" style="text-align: left;">
-      <img src="./t-photos/Servo.PNG" alt="Servo Motor" width="100%">
+      <img src="other\other_images\Servo.PNG" alt="Servo Motor" width="100%">
     </td>
     <td width="50%" style="text-align: left; vertical-align: top;">
       <h3>Specifications:</h3>
@@ -552,7 +554,7 @@ The robot's power and sensing systems represent a sophisticated integration of m
 <table>
   <tr>
     <td width="50%" style="text-align: left;">
-      <img src="./v-photos/battery-placeholder.jpg" alt="Battery Pack" width="100%">
+      <img src="other\other_images\battery.jpg" alt="Battery Pack" width="100%">
     </td>
     <td width="50%" style="text-align: left; vertical-align: top;">
       <h3>Specifications:</h3>
@@ -642,7 +644,7 @@ Where to buy: [Official Raspberry Pi Foundation](https://www.raspberrypi.org/)
 <table>
   <tr>
     <td width="50%" style="text-align: left;">
-      <img src="./t-photos/Raspberry_Pi_Pico.webp" alt="Raspberry Pi Pico" width="100%">
+      <img src="other\other_images\Raspberry_Pi_Pico.webp" alt="Raspberry Pi Pico" width="100%">
     </td>
     <td width="50%" style="text-align: left; vertical-align: top;">
       <h3>Specifications (per board):</h3>
@@ -692,7 +694,7 @@ Where to buy: [Official Raspberry Pi Foundation](https://www.raspberrypi.org/)
 <table>
   <tr>
     <td width="50%" style="text-align: left;">
-      <img src="./t-photos/Camera.jpg" alt="Camera Module" width="100%">
+      <img src="other\other_images\Camera.jpg" alt="Camera Module" width="100%">
     </td>
     <td width="50%" style="text-align: left; vertical-align: top;">
       <h3>Specifications:</h3>
@@ -788,7 +790,7 @@ Where to buy: [Electronic component suppliers](https://www.adafruit.com)
 <table>
   <tr>
     <td width="50%" style="text-align: left;">
-      <img src="./t-photos/Compass.jfif" alt="Compass Module" width="100%">
+      <img src="other\other_images\Compass.jfif" alt="Compass Module" width="100%">
     </td>
     <td width="50%" style="text-align: left; vertical-align: top;">
       <h3>Specifications:</h3>
@@ -2738,23 +2740,23 @@ Raspberry Pi Zero (CSI port) ←─────→ Camera Module 3 Wide
 ### GPIO Pin Assignments
 
 **Raspberry Pi Pico #1 (Main Controller):**
-| GPIO Pin | Function | Connection |
-|----------|----------|------------|
-| GP0-GP1 | UART TX/RX | To Raspberry Pi Zero |
-| GP2-GP3 | I2C SDA/SCL | To CMPS12 Compass |
-| GP4-GP5 | Sonar Trigger/Echo | Front Ultrasonic |
-| GP6-GP7 | Sonar Trigger/Echo | Left Ultrasonic |
-| GP12-GP13 | PWM Motor Control | To TB6612FNG Driver |
-| GP14 | UART Servo Control | To MG996R Servo |
-| GP20-GP21 | Encoder Input | Motor encoder signals |
+| GPIO Pin  | Function           | Connection            |
+| --------- | ------------------ | --------------------- |
+| GP0-GP1   | UART TX/RX         | To Raspberry Pi Zero  |
+| GP2-GP3   | I2C SDA/SCL        | To CMPS12 Compass     |
+| GP4-GP5   | Sonar Trigger/Echo | Front Ultrasonic      |
+| GP6-GP7   | Sonar Trigger/Echo | Left Ultrasonic       |
+| GP12-GP13 | PWM Motor Control  | To TB6612FNG Driver   |
+| GP14      | UART Servo Control | To MG996R Servo       |
+| GP20-GP21 | Encoder Input      | Motor encoder signals |
 
 **Raspberry Pi Pico #2 (Sonar Slave):**
-| GPIO Pin | Function | Connection |
-|----------|----------|------------|
-| GP0-GP1 | UART TX/RX | To Raspberry Pi Zero |
-| GP4-GP5 | Sonar Trigger/Echo | Right Ultrasonic |
-| GP6-GP7 | Sonar Trigger/Echo | Rear Ultrasonic |
-| GP16 | Status LED | System health indicator |
+| GPIO Pin | Function           | Connection              |
+| -------- | ------------------ | ----------------------- |
+| GP0-GP1  | UART TX/RX         | To Raspberry Pi Zero    |
+| GP4-GP5  | Sonar Trigger/Echo | Right Ultrasonic        |
+| GP6-GP7  | Sonar Trigger/Echo | Rear Ultrasonic         |
+| GP16     | Status LED         | System health indicator |
 
 ### Motor Driver Connections (SparkFun TB6612FNG)
 
@@ -2820,13 +2822,13 @@ Common Ground Star Point
 
 ### Cable Specifications
 
-| Connection | Wire Gauge | Length | Type |
-|------------|------------|--------|------|
-| Battery to Switch | 16 AWG | 10cm | Silicone, red/black |
-| Motor Power | 18 AWG | 15cm | Twisted pair |
-| 5V Distribution | 22 AWG | Various | Silicone |
-| Sensor Signals | 26 AWG | 10-20cm | Shielded |
-| I2C Bus | 24 AWG | 12cm | Twisted pair |
+| Connection        | Wire Gauge | Length  | Type                |
+| ----------------- | ---------- | ------- | ------------------- |
+| Battery to Switch | 16 AWG     | 10cm    | Silicone, red/black |
+| Motor Power       | 18 AWG     | 15cm    | Twisted pair        |
+| 5V Distribution   | 22 AWG     | Various | Silicone            |
+| Sensor Signals    | 26 AWG     | 10-20cm | Shielded            |
+| I2C Bus           | 24 AWG     | 12cm    | Twisted pair        |
 
 ### Testing Points and Debug Interfaces
 
