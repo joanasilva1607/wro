@@ -341,7 +341,7 @@ The encoder data is processed by our Raspberry Pi Pico using hardware interrupts
 - Position tracking for autonomous navigation
 - Diagnostic capabilities for system health monitoring
 
-Where to find the encoder: [Precision Components Ltd](https://www.example.com)
+Where to find the encoder: [Aliexpress](https://pt.aliexpress.com/w/wholesale-encoder.html?spm=a2g0o.tesla.search.0)
 
 <br>
 
@@ -424,7 +424,7 @@ The MG996R delivers consistent performance across our entire operating range, pr
 - Integrated position feedback for closed-loop control
 - Thermal management for extended operation periods
 
-Where to buy the servo motor: [Servo City](https://www.servocity.com/) or [Educational Robotics Suppliers](https://www.example.com)
+Where to buy the servo motor: [Aliexpress](https://pt.aliexpress.com/item/1005006835246628.html?src=google&pdp_npi=4%40dis!EUR!12.21!4.13!!!!!%40!12000038597307276!ppc!!!&snps=y&snpsid=1&src=google&albch=shopping&acnt=752-015-9270&isdl=y&slnk=&plac=&mtctp=&albbt=Google_7_shopping&aff_platform=google&aff_short_key=_oDeeeiG&gclsrc=aw.ds&&albagn=888888&&ds_e_adid=775533696858&ds_e_matchtype=search&ds_e_device=c&ds_e_network=g&ds_e_product_group_id=2443559876040&ds_e_product_id=pt1005006835246628&ds_e_product_merchant_id=5551326180&ds_e_product_country=PT&ds_e_product_language=pt&ds_e_product_channel=online&ds_e_product_store_id=&ds_url_v=2&albcp=23055248314&albag=185546654149&isSmbAutoCall=false&needSmbHouyi=false&gad_source=1&gad_campaignid=23055248314&gbraid=0AAAAA_eFwRBtlsc4f7xKQU2JHORYcACTU&gclid=CjwKCAiAzrbIBhA3EiwAUBaUdb7HvU5Ydld1UARM8PhsRQmwqEbBWI40-0sSF6zxGCxh0EipFA11ZxoC63cQAvD_BwE).
 
 <br>
 
@@ -552,7 +552,7 @@ The robot's power and sensing systems represent a sophisticated integration of m
 <table>
   <tr>
     <td width="50%" style="text-align: left;">
-      <img src="./v-photos/battery-placeholder.jpg" alt="Battery Pack" width="100%">
+      <img src="other\other_images\battery.jpg" alt="Battery Pack" width="100%">
     </td>
     <td width="50%" style="text-align: left; vertical-align: top;">
       <h3>Specifications:</h3>
@@ -583,7 +583,7 @@ The battery is secured in a dedicated compartment on the chassis's second level,
 - 5V rail: Raspberry Pi Zero and servo motor
 - 3.3V rail: Sensors and digital logic
 
-Where to buy the battery: [Battery specialists](https://www.batteryspace.com)
+Where to buy the battery: [Hobby King](https://hobbyking.com/pt_pt/catalogsearch/result/?q=battery)
 
 <br>
 
@@ -598,7 +598,7 @@ Where to buy the battery: [Battery specialists](https://www.batteryspace.com)
 <table>
   <tr>
     <td width="50%" style="text-align: left;">
-      <img src="./v-photos/rpi5-placeholder.jpg" alt="Raspberry Pi Zero" width="100%">
+      <img src="other\other_images\Raspberry_Pi_zero.jpg" alt="Raspberry Pi Zero" width="100%">
     </td>
     <td width="50%" style="text-align: left; vertical-align: top;">
       <h3>Overview:</h3>
@@ -628,7 +628,7 @@ The Raspberry Pi Zero serves as the coordination computer, handling high-level l
 - Multi-threading for sensor I/O and communications
 - Optimized memory and CPU usage for reliability
 
-Where to buy: [Official Raspberry Pi Foundation](https://www.raspberrypi.org/)
+Where to buy Raspberry Pi Zero: [Amazon](https://www.amazon.es/dp/B09KLVX4RT/ref=asc_df_B09KLVX4RT?mcid=4f823435565b3d88a12964ba2d3612cf&language=pt_PT&tag=ptgogshpadde-21&linkCode=df0&hvadid=718275928253&hvpos=&hvnetw=g&hvrand=16143994379914183830&hvpone=&hvptwo=&hvqmt=&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=1011751&hvtargid=pla-1558634205274&psc=1&language=pt_PT&gad_source=1)
 
 <br>
 
@@ -677,7 +677,7 @@ We use two Raspberry Pi Pico boards. They handle real-time control tasks, sensor
 - PWM: Motor control and servo positioning
 - GPIO: Ultrasonic sensors and digital I/O
 
-Where to buy: [Official Raspberry Pi Foundation](https://www.raspberrypi.org/)
+Where to buy Raspberry Pi Pico: [Aliexpress](https://pt.aliexpress.com/item/1005007359981489.html?src=google&pdp_npi=4%40dis!EUR!43.00!13.76!!!!!%40!12000040418738176!ppc!!!&snps=y&snpsid=1&src=google&albch=shopping&acnt=752-015-9270&isdl=y&slnk=&plac=&mtctp=&albbt=Google_7_shopping&aff_platform=google&aff_short_key=_oDeeeiG&gclsrc=aw.ds&&albagn=888888&&ds_e_adid=766943355992&ds_e_matchtype=search&ds_e_device=c&ds_e_network=g&ds_e_product_group_id=2489814656527&ds_e_product_id=pt1005007359981489&ds_e_product_merchant_id=5551326180&ds_e_product_country=PT&ds_e_product_language=pt&ds_e_product_channel=online&ds_e_product_store_id=&ds_url_v=2&albcp=22848996932&albag=180511188662&isSmbAutoCall=false&needSmbHouyi=false&gad_source=1&gad_campaignid=22848996932&gbraid=0AAAAA_eFwRDpiyZ0rj3zyJ3M8jZO-ct18&gclid=CjwKCAiAzrbIBhA3EiwAUBaUdeIqfmGAi1YiiuHb8HidZPmaWHY7m6PIZSjjja4nKex6A8XrU8-QShoCrjMQAvD_BwE)
 
 <br>
 
@@ -725,7 +725,7 @@ Our computer vision system centers around the Raspberry Pi Camera Module 3 Wide,
 **Mounting and Positioning:**
 The camera is mounted on the elevated sensor tower with precise angular positioning optimized for the WRO track geometry. The mounting system includes vibration isolation and fine adjustment capabilities.
 
-Where to buy: [Official Raspberry Pi Foundation](https://www.raspberrypi.org/)
+Where to buy Raspberry Pi Camera Module 3 Wide: [Amazon](https://www.amazon.es/dp/B0BRY6MVXL/ref=asc_df_B0BRY6MVXL?mcid=77b01f70ecf0330fbf805506872a2254&language=pt_PT&tag=ptgogshpadde-21&linkCode=df0&hvadid=718275928253&hvpos=&hvnetw=g&hvrand=7038042178456276716&hvpone=&hvptwo=&hvqmt=&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=1011751&hvtargid=pla-2017690033194&gad_source=1&th=1)
 
 <br>
 
@@ -740,7 +740,7 @@ Where to buy: [Official Raspberry Pi Foundation](https://www.raspberrypi.org/)
 <table>
   <tr>
     <td width="50%" style="text-align: left;">
-      <img src="./v-photos/sonar-placeholder.jpg" alt="Ultrasonic Sensors" width="100%">
+      <img src="other\other_images\sonar.jpg" alt="Ultrasonic Sensors" width="100%">
     </td>
     <td width="50%" style="text-align: left; vertical-align: top;">
       <h3>Specifications:</h3>
@@ -773,7 +773,7 @@ Our robot employs four strategically positioned HC-SR04 ultrasonic sensors provi
 - Sensor health monitoring and fault detection
 - Calibration routines for optimal performance
 
-Where to buy: [Electronic component suppliers](https://www.adafruit.com)
+Where to buy Sonar Sensor: [Aliexpress](https://pt.aliexpress.com/item/1005006140660054.html?src=google&pdp_npi=4%40dis!EUR!2.26!1.42!!!!!%40!12000035941498091!ppc!!!&snps=y&snpsid=1&src=google&albch=shopping&acnt=752-015-9270&isdl=y&slnk=&plac=&mtctp=&albbt=Google_7_shopping&aff_platform=google&aff_short_key=_oDeeeiG&gclsrc=aw.ds&&albagn=888888&&ds_e_adid=766943355992&ds_e_matchtype=search&ds_e_device=c&ds_e_network=g&ds_e_product_group_id=2489814656527&ds_e_product_id=pt1005006140660054&ds_e_product_merchant_id=5551326180&ds_e_product_country=PT&ds_e_product_language=pt&ds_e_product_channel=online&ds_e_product_store_id=&ds_url_v=2&albcp=22848996932&albag=180511188662&isSmbAutoCall=false&needSmbHouyi=false&gad_source=1&gad_campaignid=22848996932&gbraid=0AAAAA_eFwRDpiyZ0rj3zyJ3M8jZO-ct18&gclid=CjwKCAiAzrbIBhA3EiwAUBaUdREZtRAH1XHLK4CB7v2e4VbArsGJ-_aNdg1joTMJ-_bot6GIOL19jhoCnbkQAvD_BwE)
 
 <br>
 
@@ -819,7 +819,7 @@ The compass is mounted on our elevated sensor tower, specifically positioned to 
 - Automatic calibration routines
 - Magnetic interference detection and compensation
 
-Where to buy: [Robot Electronics](https://www.robot-electronics.co.uk/)
+Where to buy Compass Module: [Aliexpress](https://pt.aliexpress.com/item/1005009213493493.html?src=google&pdp_npi=4%40dis!EUR!21.16!10.35!!!!!%40!12000048333490192!ppc!!!&snps=y&snpsid=1&src=google&albch=shopping&acnt=752-015-9270&isdl=y&slnk=&plac=&mtctp=&albbt=Google_7_shopping&aff_platform=google&aff_short_key=_oDeeeiG&gclsrc=aw.ds&&albagn=888888&&ds_e_adid=768363663774&ds_e_matchtype=search&ds_e_device=c&ds_e_network=g&ds_e_product_group_id=2438187705995&ds_e_product_id=pt1005009213493493&ds_e_product_merchant_id=5551326180&ds_e_product_country=PT&ds_e_product_language=pt&ds_e_product_channel=online&ds_e_product_store_id=&ds_url_v=2&albcp=22881596797&albag=185267208644&isSmbAutoCall=false&needSmbHouyi=false&gad_source=1&gad_campaignid=22881596797&gbraid=0AAAAA_eFwRDCpuYr3VuKQM904aGwDJszc&gclid=CjwKCAiAzrbIBhA3EiwAUBaUdWQOa8W23xo_BxUeCnIBowStrpd7YNRXY0_4DEdR8UxLldlPCS3fTxoCbuUQAvD_BwE)
 
 <br>
 
