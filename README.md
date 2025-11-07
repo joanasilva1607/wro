@@ -1576,14 +1576,14 @@ Our obstacle management system represents the core competitive advantage of our 
          │                 │  (Laps 2 & 3)      │
          │                 └─────────┬──────────┘
          │                           │
+         │                           ▼
+         │                 ┌────────────────────┐
+         │                 │   PARKING SEQUENCE │
+         │                 │  • Approach zone  │
+         │                 │  • Precision parking│
+         │                 └─────────┬──────────┘
+         │                           │
          └───────────┬───────────────┘
-                     │
-                     ▼
-          ┌──────────────────────┐
-          │   PARKING SEQUENCE    │
-          │  • Approach zone      │
-          │  • Precision parking  │
-          └──────────┬────────────┘
                      │
                      ▼
           ┌──────────────────────┐
@@ -1647,9 +1647,11 @@ START
         │YES                │NO
         │                   │
         ▼                   ▼
-   (Loop back)      ┌───────────────┐
-                    │ Parking Phase │
-                    └───────────────┘
+   (Loop back)      ┌──────────────────┐
+                    │ MISSION COMPLETE │
+                    │  • Stop motors   │
+                    │  • Save logs     │
+                    └──────────────────┘
 ```
 
 ### Obstacle Challenge - Discovery Phase Flow
