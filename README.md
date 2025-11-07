@@ -305,7 +305,7 @@ We selected the **SparkFun TB6612FNG** dual H-bridge motor driver for its superi
 
 The TB6612FNG's efficiency translates directly to improved robot performance through longer battery life and more consistent motor speed under load.
 
-Where to buy: [SparkFun](https://www.sparkfun.com/products/14450) | [Adafruit](https://www.adafruit.com/product/2448)
+Where to buy: (https://www.sparkfun.com/sparkfun-motor-driver-dual-tb6612fng-with-headers.html)
 
 <br>
 
