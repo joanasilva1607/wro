@@ -10,6 +10,7 @@ from .compass_hal import CompassHAL
 from .encoder_hal import EncoderHAL
 from .communication_hal import CommunicationHAL
 from .button_hal import ButtonHAL
+from .camera_hal import CameraHAL
 
 __all__ = [
     'BaseHAL',
@@ -19,5 +20,6 @@ __all__ = [
     'CompassHAL',
     'EncoderHAL',
     'CommunicationHAL',
-    'ButtonHAL'
+    'ButtonHAL',
+    'CameraHAL'
 ]

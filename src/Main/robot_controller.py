@@ -5,7 +5,7 @@ Implements high-level robot behaviors using the Hardware Abstraction Layer.
 
 import time
 import math
-from hal import HALManager, MotorHAL, ServoHAL, CompassHAL, EncoderHAL, CommunicationHAL, ButtonHAL
+from hal import HALManager, MotorHAL, ServoHAL, CompassHAL, EncoderHAL, CommunicationHAL, ButtonHAL, CameraHAL
 from config import get_config
 
 
@@ -39,6 +39,9 @@ class RobotController:
         button_config = self._config.get_hardware_config('button')
         self._button_hal = ButtonHAL(**button_config)
         
+        camera_config = self._config.get_hardware_config('camera')
+        self._camera_hal = CameraHAL(**camera_config)
+        
         # Register components
         self._hal_manager.register_component('motor', self._motor_hal)
         self._hal_manager.register_component('servo', self._servo_hal)
@@ -46,6 +49,7 @@ class RobotController:
         self._hal_manager.register_component('encoder', self._encoder_hal)
         self._hal_manager.register_component('communication', self._comm_hal)
         self._hal_manager.register_component('button', self._button_hal)
+        self._hal_manager.register_component('camera', self._camera_hal)
         
         # Robot state
         self._is_initialized = False
@@ -1216,7 +1220,9 @@ class RobotController:
             'relative_distance': self.get_relative_distance(),
             'servo_angle': self._servo_hal.get_current_angle() if self._servo_hal.is_initialized() else None,
             'motor_moving': self._motor_hal.is_moving() if self._motor_hal.is_initialized() else False,
-            'encoder_moving': self._encoder_hal.is_moving() if self._encoder_hal.is_initialized() else False
+            'encoder_moving': self._encoder_hal.is_moving() if self._encoder_hal.is_initialized() else False,
+            'camera_color': self.get_camera_color(),
+            'camera_color_name': self.get_camera_color_name()
         }
         
     def print_status(self):
@@ -1246,6 +1252,82 @@ class RobotController:
         if self._button_hal.is_initialized():
             return self._button_hal.wait_for_press(timeout_ms)
         return False
+    
+    # === Camera Functions ===
+    
+    def read_camera_color(self):
+        """
+        Read the current obstacle color from camera.
+        
+        Returns:
+            str: Color code ('1'=Red, '2'=Green, '3'=Unknown) or None
+        """
+        if self._camera_hal.is_initialized():
+            return self._camera_hal.read_color()
+        return None
+    
+    def get_camera_color(self):
+        """
+        Get the last detected obstacle color.
+        
+        Returns:
+            str: Last color code or None if never read
+        """
+        if self._camera_hal.is_initialized():
+            return self._camera_hal.get_color()
+        return None
+    
+    def get_camera_color_name(self, color_code=None):
+        """
+        Get human-readable color name.
+        
+        Args:
+            color_code: Color code (default: uses last detected color)
+            
+        Returns:
+            str: Color name ('Red', 'Green', 'Unknown') or None
+        """
+        if self._camera_hal.is_initialized():
+            return self._camera_hal.get_color_name(color_code)
+        return None
+    
+    def is_obstacle_red(self):
+        """Check if last detected obstacle color is red."""
+        if self._camera_hal.is_initialized():
+            return self._camera_hal.is_red()
+        return False
+    
+    def is_obstacle_green(self):
+        """Check if last detected obstacle color is green."""
+        if self._camera_hal.is_initialized():
+            return self._camera_hal.is_green()
+        return False
+    
+    def is_obstacle_unknown(self):
+        """Check if last detected obstacle color is unknown."""
+        if self._camera_hal.is_initialized():
+            return self._camera_hal.is_unknown()
+        return False
+    
+    def wait_for_camera_color(self, timeout=None):
+        """
+        Wait for a color reading from camera with optional timeout.
+        
+        Args:
+            timeout: Maximum time to wait in seconds (None for no timeout)
+            
+        Returns:
+            str: Color code or None if timeout
+        """
+        if self._camera_hal.is_initialized():
+            return self._camera_hal.wait_for_color(timeout)
+        return None
+    
+    def get_camera_statistics(self):
+        """Get camera statistics."""
+        if self._camera_hal.is_initialized():
+            return self._camera_hal.get_statistics()
+        return None
         
     def obstacle_corner(self, last_inside=False, color_inside=None, color_outside=None, 
                        is_first_lane=False, clockwise=True, next_lane=None):

@@ -48,6 +48,11 @@ class RobotConfig:
                 "pin": 22,
                 "pull_up": True,
                 "debounce_ms": 50
+            },
+            "camera": {
+                "uart_id": 1,
+                "baudrate": 50,
+                "rx_pin": 9
             }
         },
         "navigation": {
