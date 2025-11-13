@@ -628,7 +628,8 @@ class RobotController:
                     if lane == 1 and not direction_detected:
                         # First lane: use compass to go straight until corner
                         print(f"First lane: Moving straight using absolute heading {target_heading:.1f}°")
-                        success = self._navigate_first_lane_absolute(front_stop_distance, target_heading)
+                        success = self.move_lane(use_compass=True, until_front_distance=front_stop_distance, blind_distance=30)
+                        
                         
                         if success:
                             # Detect direction at the corner
@@ -1173,10 +1174,10 @@ class RobotController:
             # If we got new complete data, update cache
             if latest_data:
                 self._last_sensor_data = {
-                    'front': latest_data[0],
+                    'left': latest_data[0],
                     'rear': latest_data[1], 
                     'right': latest_data[2],
-                    'left': latest_data[3]
+                    'front': latest_data[3]
                 }
                 
         except Exception as e:

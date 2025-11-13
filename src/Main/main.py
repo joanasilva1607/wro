@@ -347,26 +347,46 @@ def main():
         if app.robot.wait_for_button_press(timeout_ms=3000):
             print("\nButton pressed! Checking sonar distances to determine challenge...")
             
-            # Get fresh sonar data
-            fresh_data = app.robot.get_fresh_sensor_data()
-            sensor_data = fresh_data['data']
+            # Get fresh sonar data, retry if initial readings contain zeroes
+            sensor_data = {}
+            front_distance = 0
+            rear_distance = 0
+            max_retries = 50
+            retry_delay_s = 0.5
+            attempts = 0
             
-            if sensor_data:
+            while attempts <= max_retries:
+                fresh_data = app.robot.get_fresh_sensor_data()
+                sensor_data = fresh_data.get('data') if fresh_data else {}
+                
                 front_distance = sensor_data.get('front', 0)
                 rear_distance = sensor_data.get('rear', 0)
+                
+                if front_distance != 0 and rear_distance != 0:
+                    break
+                
+                attempts += 1
+                if attempts > max_retries:
+                    print("WARNING: Sonar readings still zero after retries; using latest values.")
+                    break
+                
+                print(f"DEBUG: Sonar reading contained zero (front={front_distance}, rear={rear_distance}). Retrying ({attempts}/{max_retries})...")
+                time.sleep(retry_delay_s)
+            
+            if sensor_data:
                 total_distance = front_distance + rear_distance
                 
                 print(f"Sonar readings - Front: {front_distance}cm, Rear: {rear_distance}cm")
                 print(f"Total distance: {total_distance}cm")
                 
                 # Decide challenge based on total distance
-                if total_distance > 100:  # More than 1 meter
-                    print("Total distance > 100cm - Starting Open Challenge...")
+                if total_distance > 30:  # More than 1 meter
+                    print("Total distance > 30cm - Starting Open Challenge...")
                     print("Challenge will begin in 2 seconds...")
                     time.sleep(2)  # Give user time to see the message
                     app.run_open_challenge()
                 else:
-                    print("Total distance <= 100cm - Starting Obstacle Challenge...")
+                    print("Total distance <= 30cm - Starting Obstacle Challenge...")
                     print("Challenge will begin in 2 seconds...")
                     time.sleep(2)  # Give user time to see the message
                     app.run_obstacle_challenge()
