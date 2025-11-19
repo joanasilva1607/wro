@@ -94,17 +94,18 @@ class CameraHAL(BaseHAL):
             return None
         
         try:
-            if not self._uart.any():
+            available = self._uart.any()
+            if not available:
                 return None
             
-            # Read exactly 1 byte
-            data = self._uart.read(1)
+            # Read all available bytes to ensure we capture the most recent value
+            data = self._uart.read(available)
+            if not data:
+                return None
             
-            if data and len(data) > 0:
-                # Decode byte to character
-                color_code = chr(data[0])
-                
-                # Validate color code
+            # Iterate from latest byte backwards to find the most recent valid color
+            for byte in reversed(data):
+                color_code = chr(byte)
                 if color_code in [self.COLOR_RED, self.COLOR_GREEN, self.COLOR_UNKNOWN]:
                     self._last_color = color_code
                     self._last_color_time = time.time()
@@ -112,9 +113,8 @@ class CameraHAL(BaseHAL):
                     self._color_counts[color_code] = self._color_counts.get(color_code, 0) + 1
                     return color_code
                 else:
-                    # Invalid color code received
-                    self._handle_error(f"Invalid color code received: {color_code} (byte: {data[0]})")
-                    return None
+                    # Invalid color code received, continue searching older bytes
+                    self._handle_error(f"Invalid color code received: {color_code} (byte: {byte})")
             
             return None
             
@@ -232,4 +232,6 @@ class CameraHAL(BaseHAL):
         """Flush input buffer."""
         if self._is_initialized and self._uart.any():
             self._uart.read(self._uart.any())
+
+
 

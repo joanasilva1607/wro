@@ -1333,11 +1333,16 @@ class RobotController:
                        is_first_lane=False, clockwise=True, next_lane=None):
         """
         Handle obstacle detection at corners for the obstacle challenge.
+        Uses camera color detection to determine obstacle position.
+        
+        Color mapping:
+        - Clockwise: red = inside, green = outside, default = outside
+        - Counter-clockwise: red = outside, green = inside, default = outside
         
         Args:
             last_inside: Whether the previous lane ended inside
-            color_inside: Color detection data for inside position
-            color_outside: Color detection data for outside position
+            color_inside: (Deprecated - now uses camera) Color detection data for inside position
+            color_outside: (Deprecated - now uses camera) Color detection data for outside position
             is_first_lane: Whether this is the first lane
             clockwise: Direction of movement
             next_lane: Next lane traffic position (if known)
@@ -1348,37 +1353,45 @@ class RobotController:
         from lane import LaneTraffic
         
         if next_lane is None or next_lane == LaneTraffic.Unknown:
-            # Need to detect the obstacle position
+            # Need to detect the obstacle position using camera
             self.rotate_angle(0, reverse=True, relative=False)
             
-            if last_inside:
-                # Move forward to get better detection
-                self.move_lane(
-                    target_cm=99999,
-                    relative=True,
-                    use_compass=False,
-                    use_sonar=False
-                )
-            else:
-                # Move forward briefly
-                self.move_lane(
-                    target_cm=99999,
-                    relative=True,
-                    use_compass=False,
-                    use_sonar=False
-                )
-            
+
+            self.move_lane(
+                until_rear_distance=10,
+                use_compass=True,
+            )
+        
             self.rotate_angle(0, relative=False)
             
-            # Simulate color detection (hardcoded for now)
-            # In future implementation, this would use actual camera data
-            if color_inside and color_outside:
-                next_obstacle_inside = (color_inside.get("detected", False) and 
-                                      color_outside.get("detected", False) and
-                                      color_inside.get("distance", 999) < color_outside.get("distance", 999))
-            elif color_inside and color_inside.get("detected", False):
-                next_obstacle_inside = True
+            # Read camera color with timeout
+            print("Reading camera color for obstacle detection...")
+            color = self.wait_for_camera_color(timeout=2.0)  # Wait up to 2 seconds for color
+            
+            # Determine obstacle position based on color and direction
+            if color:
+                color_name = self.get_camera_color_name(color)
+                print(f"Camera detected color: {color} ({color_name})")
+                
+                if clockwise:
+                    # Clockwise: red = inside, green = outside, default = outside
+                    if color == self._camera_hal.COLOR_RED:
+                        next_obstacle_inside = True
+                    elif color == self._camera_hal.COLOR_GREEN:
+                        next_obstacle_inside = False
+                    else:  # Unknown or None
+                        next_obstacle_inside = False
+                else:
+                    # Counter-clockwise: red = outside, green = inside, default = outside
+                    if color == self._camera_hal.COLOR_RED:
+                        next_obstacle_inside = False
+                    elif color == self._camera_hal.COLOR_GREEN:
+                        next_obstacle_inside = True
+                    else:  # Unknown or None
+                        next_obstacle_inside = False
             else:
+                # No color detected - default to outside
+                print("No color detected, defaulting to outside")
                 next_obstacle_inside = False
                 
             # Make the turn to avoid the obstacle
@@ -1388,23 +1401,12 @@ class RobotController:
                 
             self.rotate_angle(angle, relative=False)
             
-            # Move forward to clear the obstacle
-            self.move_forward(0.4)
-            
-            if not next_obstacle_inside and is_first_lane:
-                time.sleep(0.18)
-            else:
-                if next_obstacle_inside:
-                    time.sleep(0.35)
-                else:
-                    time.sleep(0.2)
-                    # Check for front obstacle
-                    sensor_data = self._get_sensor_data()
-                    front_distance = sensor_data.get('front', 255)
-                    while front_distance > 17:
-                        time.sleep(0.001)
-                        sensor_data = self._get_sensor_data()
-                        front_distance = sensor_data.get('front', 255)
+
+            self.move_lane(
+                target_cm=15 if not next_obstacle_inside and is_first_lane else 25,
+                use_compass=True,
+                lock_compass_heading=True,
+            )
             
             self.rotate_angle(0, relative=False)
             
@@ -1435,7 +1437,7 @@ class RobotController:
             return False
             
         # Initialize hardcoded lane positions if not provided
-        if hardcoded_lanes is None:
+        if hardcoded_lanes is None and False:
             # Default hardcoded lane configuration
             hardcoded_lanes = [
                 Lane(LaneTraffic.Inside, LaneTraffic.Outside),   # Lane 0
@@ -1444,7 +1446,14 @@ class RobotController:
                 Lane(LaneTraffic.Outside, LaneTraffic.Inside),   # Lane 3
             ]
             
-        print(f"Using {len(hardcoded_lanes)} hardcoded lane positions")
+            print(f"Using {len(hardcoded_lanes)} hardcoded lane positions")
+        else:
+            hardcoded_lanes = [
+                Lane(LaneTraffic.Unknown, LaneTraffic.Unknown),   # Lane 0
+                Lane(LaneTraffic.Unknown, LaneTraffic.Unknown),   # Lane 1
+                Lane(LaneTraffic.Unknown, LaneTraffic.Unknown),   # Lane 2
+                Lane(LaneTraffic.Unknown, LaneTraffic.Unknown),   # Lane 3
+            ]
         
         # Challenge state
         current_lane = 0
@@ -1474,10 +1483,6 @@ class RobotController:
         print(f"Direction detected: {'CLOCKWISE' if clockwise else 'ANTICLOCKWISE'}")
         print(f"Following {side_sonar} wall")
         
-        # Simulate color detection data (hardcoded for now)
-        color_outside = {"detected": True, "distance": 30}
-        color_inside = {"detected": True, "distance": 50}
-        
         try:
             # Exit parking area
             print("Exiting parking area...")
@@ -1488,20 +1493,32 @@ class RobotController:
                 lock_compass_heading=True,
                 until_rear_distance=4
             )
-            self.rotate_angle(50 if clockwise else -50)
+            self.rotate_angle(25 if clockwise else -70)
             
-            # Check initial lane alignment
+            # Check initial lane alignment using camera
+            print("Reading camera color for initial lane alignment...")
+            time.sleep(2)
+            initial_color = self.wait_for_camera_color(timeout=60)
+            
             previous_lane_alignment = False
-            if color_inside["detected"] and color_outside["detected"]:
-                previous_lane_alignment = (color_inside["distance"] < color_outside["distance"])
-            elif color_inside["detected"]:
-                previous_lane_alignment = True
+            if initial_color:
+                color_name = self.get_camera_color_name(initial_color)
+                print(f"Initial color detected: {initial_color} ({color_name})")
+                
+                if clockwise:
+                    # Clockwise: red = inside, green = outside
+                    previous_lane_alignment = (initial_color == self._camera_hal.COLOR_RED)
+                else:
+                    # Counter-clockwise: red = outside, green = inside
+                    previous_lane_alignment = (initial_color == self._camera_hal.COLOR_GREEN)
             else:
+                # No color detected - default to outside
+                print("No initial color detected, defaulting to outside")
                 previous_lane_alignment = False
                 
             # Exit parking based on alignment
             if previous_lane_alignment:
-                self.rotate_angle(40 if clockwise else -40)
+                self.rotate_angle(90 if clockwise else -90, relative=False)
                 self.move_lane(
                     relative=True,
                     clockwise=clockwise,
@@ -1536,14 +1553,14 @@ class RobotController:
                 wall_distance=wall_distance,
                 use_sonar=True,
                 use_compass=True,
-                until_front_distance=15,
+                until_front_distance=40,
                 blind_distance=50
             )
             
         
             
             current_lane = 1
-            number_laps = 1
+            number_laps = 3
 
             
             # Main obstacle challenge loop
@@ -1569,8 +1586,8 @@ class RobotController:
                 
                 detected_position = self.obstacle_corner(
                     last_inside=(previous_lane_final == LaneTraffic.Inside),
-                    color_inside=color_inside,
-                    color_outside=color_outside,
+                    color_inside=None,  # Deprecated - camera is used instead
+                    color_outside=None,  # Deprecated - camera is used instead
                     is_first_lane=is_first_lane,
                     clockwise=clockwise,
                     next_lane=hardcoded_lanes[lane_index].initial
@@ -1601,20 +1618,33 @@ class RobotController:
 
                 # Detect final position if unknown
                 if hardcoded_lanes[lane_index].final == LaneTraffic.Unknown:
-                    angle = -15 if hardcoded_lanes[lane_index].initial == LaneTraffic.Inside else 15
+                    angle = -20 if hardcoded_lanes[lane_index].initial == LaneTraffic.Inside else 20
                     if not clockwise:
                         angle = -angle
                         
                     self.rotate_angle(angle, relative=False)
                     
-                    # Simulate final position detection
-                    if color_inside["detected"] and color_outside["detected"]:
-                        hardcoded_lanes[lane_index].final = (LaneTraffic.Inside 
-                                                           if (color_inside["distance"] < color_outside["distance"]) 
-                                                           else LaneTraffic.Outside)
-                    elif color_inside["detected"]:
-                        hardcoded_lanes[lane_index].final = LaneTraffic.Inside
+                    # Detect final position using camera
+                    print("Reading camera color for final position detection...")
+                    final_color = self.wait_for_camera_color(timeout=2.0)
+                    
+                    if final_color:
+                        color_name = self.get_camera_color_name(final_color)
+                        print(f"Final color detected: {final_color} ({color_name})")
+                        
+                        if clockwise:
+                            # Clockwise: red = inside, green = outside
+                            hardcoded_lanes[lane_index].final = (LaneTraffic.Inside 
+                                                               if final_color == self._camera_hal.COLOR_RED
+                                                               else LaneTraffic.Outside)
+                        else:
+                            # Counter-clockwise: red = outside, green = inside
+                            hardcoded_lanes[lane_index].final = (LaneTraffic.Inside 
+                                                               if final_color == self._camera_hal.COLOR_GREEN
+                                                               else LaneTraffic.Outside)
                     else:
+                        # No color detected - default to outside
+                        print("No final color detected, defaulting to outside")
                         hardcoded_lanes[lane_index].final = LaneTraffic.Outside
                         
                 # Handle position change if needed
@@ -1658,7 +1688,7 @@ class RobotController:
                     target_distance = 15
                 elif hardcoded_lanes[next_lane_index].initial == LaneTraffic.Unknown:
                     #First lap
-                    target_distance = 50
+                    target_distance = 40
                 elif hardcoded_lanes[next_lane_index].initial == LaneTraffic.Inside:
                     #Next is an Inside lane
                     target_distance = 63
@@ -1682,17 +1712,6 @@ class RobotController:
                     until_front_distance=target_distance,
                     blind_distance=80
                 )
-                
-                # Additional movement for first few lanes
-                if False: # current_lane < 5:
-                    self.move_lane(
-                        relative=True,
-                        clockwise=clockwise,
-                        wall_distance=wall_distance,
-                        use_sonar=True,
-                        use_compass=True,
-                        until_front_distance=40
-                    )
                     
                 current_lane += 1
                 current_lap = int(current_lane / 4)
@@ -1703,7 +1722,7 @@ class RobotController:
             
             self.rotate_angle(0, reverse=clockwise, relative=False)
             
-            if clockwise:
+            if clockwise and hardcoded_lanes[3].final == LaneTraffic.Inside:
                 self.rotate_angle(90, reverse=True, relative=False)
                 self.move_lane(
                     relative=True,
