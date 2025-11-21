@@ -3080,11 +3080,10 @@ Bed Temperature: 60°C
 Nozzle Temperature: 210°C
 ```
 
-### Circuit Diagrams and Electrical Schematics
-- **Complete Wiring Diagram:** `/schemes/wiring_diagram_v3.pdf` (professional-grade schematic)
-- **Power Distribution:** Detailed in Circuit Diagram section above
-- **PCB Layouts:** `/schemes/pcb/` (if custom PCBs are used)
-- **Pin Assignment Tables:** Documented in Circuit Diagram section
+### Electrical Schematic
+- **Complete Wiring Diagram:** `/schemes/Schematic_WRO.svg` 
+  
+![Electrical schematic](./schemes/Schematic_WRO.png)
 
 ### Software Source Code
 - **Main Control Software:** `/src/Main/` (Python 3.9+)
